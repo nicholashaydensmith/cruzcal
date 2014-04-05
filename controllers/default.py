@@ -18,9 +18,13 @@ def index():
     if you need a simple wiki simply replace the two lines below with:
     return auth.wiki()
     """
-    response.flash = T("Welcome to web2py!")
-    return dict(message=T('Hello World'))
-
+    #Grab username
+    user = "Nick"
+    user_found = False
+    if user_found:
+        return dict(message=T('Welcome to CruzCal, ' + user))
+    else:
+        return dict(not_found=T(''))
 
 def user():
     """
@@ -47,7 +51,6 @@ def download():
     """
     return response.download(request, db)
 
-
 def call():
     """
     exposes services. for example:
@@ -56,7 +59,6 @@ def call():
     supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
     """
     return service()
-
 
 @auth.requires_signature()
 def data():
