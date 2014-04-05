@@ -13,7 +13,11 @@ db.tags.name.unique = True
 
 # event
 db.define_table ('events',
+<<<<<<< HEAD
+                 Field ('name','string'),
+=======
                  Field('name','string'),
+>>>>>>> 1d507533b6779a36c7ff39ae0c0bf267f6280bb9
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string'),
                  Field ('details','json'),
