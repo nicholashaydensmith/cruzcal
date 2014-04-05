@@ -6,18 +6,18 @@ from datetime import datetime
 
 # tags
 db.define_table ('tags',
-                 Field('name','string')
+                 Field ('name','string')
                  )
 
-db.tags.name.requires.unique = True
+db.tags.name.unique = True
 
 # event
 db.define_table ('events',
-                 Feild ('name','string'),
-                 Feild ('owner_id',default=get_user_id()),
-                 Feild ('tags','list:string'),
-                 Feild ('details','json'),
-                 Feild ('image','upload')
+                 Field ('name','string'),
+                 Field ('owner_id',default=get_user_id()),
+                 Field ('tags','list:string'),
+                 Field ('details','json'),
+                 Field ('image','upload')
                  )
 
 db.events.owner_id.readable = false
