@@ -1,0 +1,9 @@
+progress.log
+cache/*
+databases/*
+errors/*
+sessions/*
+*.pyc
+*.bak
+*.DS_Store
+private/*
