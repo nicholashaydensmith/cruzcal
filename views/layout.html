@@ -41,10 +41,11 @@
 
   <!-- include stylesheets -->
   {{
-  response.files.insert(0,URL('static','css/web2py.css'))
-  response.files.insert(1,URL('static','css/bootstrap.min.css'))
-  response.files.insert(2,URL('static','css/bootstrap-responsive.min.css'))
-  response.files.insert(3,URL('static','css/web2py_bootstrap.css'))
+  response.files.insert(0,URL('static','css/cruzcal.css'))
+  response.files.insert(1,URL('static','css/web2py.css'))
+  response.files.insert(2,URL('static','css/bootstrap.min.css'))
+  response.files.insert(3,URL('static','css/bootstrap-responsive.min.css'))
+  response.files.insert(4,URL('static','css/web2py_bootstrap.css'))
   }}
 
   {{include 'web2py_ajax.html'}}
@@ -66,32 +67,10 @@
 </head>
 
 <body>
-  <!-- Navbar ================================================== -->
-  <div class="navbar navbar-inverse">
-    <div class="flash">{{=response.flash or ''}}</div>
-    <div class="navbar-inner">
-      <div class="container">
-        {{is_mobile=request.user_agent().is_mobile}}
-        <!-- the next tag is necessary for bootstrap menus, do not remove -->
-        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse" style="{{='display:none;' if not is_mobile else ''}}">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        {{=response.logo or ''}}
-        <ul id="navbar" class="nav pull-right">{{='auth' in globals() and auth.navbar(mode="dropdown") or ''}}</ul>
-        <div class="{{='nav-collapse' if is_mobile else 'nav'}}">
-          {{if response.menu:}}
-          {{=MENU(response.menu, _class='mobile-menu nav' if is_mobile else 'nav',mobile=is_mobile,li_class='dropdown',ul_class='dropdown-menu')}}
-          {{pass}}
-        </div><!--/.nav-collapse -->
-      </div>
-    </div>
-  </div><!--/top navbar -->
-
   <div class="container">
     <!-- Masthead ================================================== -->
-    <header class="mastheader row" id="header">
+    <header class="mastheader row" id="header" align="center">
+{{=FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit'))}}
       {{if response.title:}}
         <div class="span12">
             <div class="page-header">
@@ -129,23 +108,6 @@
         </div>
         {{pass}}
     </section><!--/main-->
-
-    <!-- Footer ================================================== -->
-    <div class="row">
-        <footer class="footer span12" id="footer">
-            <div class="footer-content">
-                {{block footer}} <!-- this is default footer -->
-                <div class="copyright pull-left">{{=T('Copyright')}} &#169; {{=request.now.year}}</div>
-                <div id="poweredBy" class="pull-right">
-                    {{=T('Powered by')}}
-                    <a href="http://www.web2py.com/">web2py</a>
-                </div>
-                {{end}}
-            </div>
-        </footer>
-    </div>
-
-  </div> <!-- /container -->
 
   <!-- The javascript =============================================
        (Placed at the end of the document so the pages load faster) -->
