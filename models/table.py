@@ -30,3 +30,4 @@ db.define_table ('profile',
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string')
                  )
+db.profile.owner_id.readable = False
