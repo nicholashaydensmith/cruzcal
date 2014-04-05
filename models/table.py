@@ -11,9 +11,16 @@ db.define_table ('tags',
 
 db.tags.name.unique = True
 
+# tag association
+db.define_table('tag_assoc',
+                Field('to_','reference tags'),
+                Field('from_','reference tags'),
+                Field('num','integer')
+                )
+
 # event
 db.define_table ('events',
-                 Field ('name','string'),
+                 Field('name','string'),
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string'),
                  Field ('details','json'),
