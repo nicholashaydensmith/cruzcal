@@ -6,31 +6,42 @@ from datetime import datetime
 
 # tags
 db.define_table ('tags',
-                 Field ('name','string')
+                 Field ('name','string'),
+                 Field ('num', 'integer')
                  )
 
 db.tags.name.unique = True
 
+# tag association
+db.define_table('tag_assoc',
+                Field('to_','string'),
+                Field('from_','string'),
+                Field('num','integer')
+                )
+
 # event
-db.define_table ('events',
+db.define_table('events',
 <<<<<<< HEAD
-                 Field ('name','string'),
+                 Field ('title','string'),
 =======
-                 Field('name','string'),
->>>>>>> 1d507533b6779a36c7ff39ae0c0bf267f6280bb9
+                 Field('title','string'),
+                 Field ('is_gfeed', 'boolean'),
+                 Field ('google_feed', 'string'),
+>>>>>>> 24153a66f1f562c8986e3b69a85be6e284e9b2c1
                  Field ('owner_id',default=get_user_id()),
+                 Field ('start_time', 'datetime'),
+                 Field ('end_time', 'datetime'),
+                 Field ('all_day', 'boolean'),
                  Field ('tags','list:string'),
-                 Field ('details','json'),
-                 Field ('image','upload')
+                 Field ('image','upload'),
+                 Field ('details', 'text')
                  )
 
 db.events.owner_id.readable = False
-db.events.tags.widget = SQLFORM.widgets.autocomplete(
-     request, db.tags.name, limitby=(0,10), min_length=2)
 
 # user
-db.define_table ('profile',
-                 Field ('name', 'string'),
+db.define_table('profile',
+                 Field ('name', 'string', default=get_user_name()),
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string')
                  )

@@ -116,7 +116,10 @@ def new_event():
                             'end_time',
                             'all_day',
                             'tags',
-                            'image'])
+                            'image',
+                            'details'])
+    gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
+    gcal.vars.is_gfeed = True
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
@@ -124,7 +127,7 @@ def new_event():
         redirect(URL('default','wall',args=[get_user_id()]))
     else:
         session.flash = T('Check for errors in form.')
-    return dict(form=form)
+    return dict(form=form, gcal=gcal)
 
 def list_format(results):
     # If no results return early
@@ -137,7 +140,7 @@ def list_format(results):
     # Format the Text into HTML
     results_html = []
     for result in results:
-        title = A(result.title, _href=URL('default', 'view_event', args=[result.title]))
+        title = A(result.title, _href=URL('default', 'view_event', args=[result.id]))
         inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
         for tag in result.tags:
             inner_html = inner_html + H4(str(tag)) + " "
@@ -161,12 +164,16 @@ def cal_format(results):
 			editable: false,
 			events: ["""
 
+    print results
     for result in results:
-        results_html += "{"
-        results_html += "title:'" + result.title + "',"
-        results_html += "start:'" + str(result.start_time) + "',"
-        results_html += "end:'" + str(result.end_time) + "'"
-        results_html += "},"
+        if result.is_gfeed:
+            results_html += result.google_feed
+        else:
+            results_html += "{"
+            results_html += "title:'" + result.title + "',"
+            results_html += "start:'" + str(result.start_time) + "',"
+            results_html += "end:'" + str(result.end_time) + "'"
+            results_html += "},"
 
     results_html += "]});});"
     return results_html
@@ -199,8 +206,18 @@ def view_event():
     if request.args == []:
         return dict()
 
-    image = db(db.events.title == request.args[0]).select().first().image
-    return dict(image=image)
+    results = db(db.events.id == request.args[0]).select()
+    print results
+    results_html = H1("")
+    for result in results:
+        results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
+        results_html += (H1(result.title))
+        results_html += (H3(result.start_time))
+        results_html += (H3(result.end_time))
+        results_html += (P(result.details))
+        results_html += (P(result.tags))
+
+    return dict(view_event=results_html)
 
 def user():
     """
