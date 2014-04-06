@@ -212,7 +212,8 @@ def cal_format(results):
             results_html += "{"
             results_html += "title:'" + result.title + "',"
             results_html += "start:'" + str(result.start_time) + "',"
-            results_html += "end:'" + str(result.end_time) + "'"
+            results_html += "end:'" + str(result.end_time) + "',"
+            results_html += "url:'" + URL('default','view_event', args=[result.id]) + "',"
             results_html += "},"
 
     results_html += "]}); });"
@@ -260,7 +261,8 @@ def view_event():
     results = db(db.events.id == request.args[0]).select()
     results_html = H1("")
     for result in results:
-        results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
+        if result.image == None:
+            results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
 
         #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
