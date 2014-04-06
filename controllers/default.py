@@ -186,18 +186,12 @@ def search_date():
     if request.vars == []:
         return dict()
     tags = parse_input_to_tags(request.vars.tags)
-    import time
-    from datetime import datetime
-    print "00"
-    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple()
-    print "01"
-    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple()
+    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
     print start, end
-    print "a"
     conflicts = get_timing_conflicts(tags, start, end);
-    print "b"
+    print "Conflicts", conflicts
     cal_results_html = cal_format(conflicts)
-    print "Results", cal_results_html
     print SCRIPT(cal_results_html, _type='text/javascript')
     return dict()
 

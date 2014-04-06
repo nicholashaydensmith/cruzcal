@@ -10,6 +10,8 @@
 # request.requires_https()
 
 import string
+import time
+from datetime import datetime
 
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
@@ -296,23 +298,18 @@ class ConflictData:
         self.event = event
         self.rel_str = rel_str
 
-# 'start' and 'end' are UNIX timestamps
 def get_tag_conflicts(tag, rel_str, start, end):
-    print "-2"
-    search1 = ((db.events.start_time > start) & (db.events.start_time < end))
-    print "-1"
-    search2 = ((start > db.events.start_time) & (start < db.events.end_time))
-    print "0"
-    entries = db(db.events.tags.contains(tag) & (search1 | search2)).select()
-    print "1"
+    entries = db(db.events.tags.contains(tag)).select()
     result = []
-    print "2"
     for e in entries:
-        result.append(ConflictData(e, rel_str))
-    print "3"
+        print "t1", e.start_time
+        e_start = datetime.strptime(e.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        print "t2", e_start
+        e_end = datetime.strptime(e.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        if ((e_start > start and e_start < end) or (e_end > start and e_end < end)):
+            result.append(ConflictData(e, rel_str))
     return result
 
-# 'start' and 'end' are UNIX timestamps
 def get_timing_conflicts(tags, start, end):
     rel_tag_data = []
     print "0"
