@@ -1,3 +1,26 @@
 {{extend 'layout.html'}}
 
+<script>
+$(document).ready(function() {
+    $("#conflict_container").hide();
+    $("#conflict_button").click(function(){
+        var form = $('form').serializeArray();
+        var start_time = form[1].value;
+        var end_time = form[2].value;
+        var tags = form[3].value;
+        $("#conflict_container").show();
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+        ajax('search_date', ['start_time', 'end_time', 'tags'], ':eval');
+
+    });
+});
+</script>
 {{=form}}
+<form>
+<input id="conflict_button" type="button" value="Check this event for time conflicts" >
+</form>
+<div name="dubious"></div>
+<div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="calendar"></div></div>

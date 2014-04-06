@@ -177,6 +177,23 @@ def search():
     cal_results_html = cal_format(results)
     return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
+def search_date():
+    tag = request.vars.tags
+    tags = []
+    tags.append(tag)
+    import time
+    import datetime
+    start = time.mktime(datetime.datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple())
+    end = time.mktime(datetime.datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple())
+    print start, end
+    print "a"
+    conflicts = get_timing_conflicts(tags, int(start), int(end));
+    print "b"
+    cal_results_html = cal_format(conflicts)
+    print "Results", cal_results_html
+    print SCRIPT(cal_results_html, _type='text/javascript')
+    return dict()
+
 def user():
     """
     exposes:
@@ -193,6 +210,7 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
+
 
 @cache.action()
 def download():
