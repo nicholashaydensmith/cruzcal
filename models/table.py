@@ -21,10 +21,12 @@ db.define_table('tag_assoc',
 
 # event
 db.define_table('events',
-                 Field('name','string'),
+                 Field('title','string'),
                  Field ('owner_id',default=get_user_id()),
+                 Field ('start_time', 'string'),
+                 Field ('end_time', 'string'),
+                 Field ('all_day', 'boolean'),
                  Field ('tags','list:string'),
-                 Field ('details','json'),
                  Field ('image','upload')
                  )
 

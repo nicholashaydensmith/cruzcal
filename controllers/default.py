@@ -72,13 +72,42 @@ def edit_profile():
         session.flash = T('Check for errors in form.')
     return dict(form=form)
     
-@auth.requires_login()
+#@auth.requires_login()
 def wall():       
-    return dict()
+    events = """
+	$(document).ready(function() {
+
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: true,
+			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
+
+	});"""
+   
+    return dict(events=SCRIPT(events, _type='text/javascript'))
 
 @auth.requires_membership('poster')
 def edit_event():
     return dict()
+
+#@auth.requires_membership('poster')
+def new_event():
+    form = SQLFORM(db.events)
+    if (form.process().accepted):
+        session.flash = T('Success!')
+        redirect(URL('default','wall',args=[get_user_id()]))
+    else:
+        session.flash = T('Check for errors in form.')
+    return dict(form=form)
+
+def search(tag):
+    results = db(db.events.tags==tag)
+    return dict(results=results)
 
 @auth.requires_login
 def setup_profile():

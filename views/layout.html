@@ -72,6 +72,7 @@
 
 <body>
 <div id="banner" align="center">
+
 	<a href="{{=URL('default', 'index')}}"><img src="{{=URL('static','images/cruzcal.png')}}" style="padding:30px;" border="0"></a>
 	{{if(auth.user == None):}}
 		{{=A('Login',_class='login_button', _id='login', _href=URL('default', 'user', args=['login'], vars = dict (_next=URL ('default', 'wall'))))}}
@@ -79,6 +80,10 @@
 	{{else:}}
 		{{=A('Logout',_class='login_button', _id='logout', _href=URL('default', 'user', args=['logout'], vars = dict (_next=URL ('default', 'index'))))}}
 	{{pass}}
+
+	<img src="{{=URL('static', 'images/cruzcal.png')}}" style="padding:30px;">
+	<a class="login_button" id="login">Login</a>
+
   <div class="container">
     <!-- Masthead ================================================== -->
     <section id="main" class="main row">

@@ -276,6 +276,14 @@ def get_related_tags(name):
         result.insert(imin, TagData(name, strength))
     return result
 
+# 'tag' can be a single tag or an array of tags
+def get_tag_events(tag):
+    entries = db(db.events.tags.contains(tag)).select()
+    result = []
+    for e in entries:
+        result.append(e)
+    return result
+
 class ConflictData:
     def __init__(self, event, rel_str):
         self.event = event
@@ -285,7 +293,7 @@ class ConflictData:
 def get_tag_conflicts(tag, rel_str, start, end):
     search1 = ((db.events.start > start) & (db.events.start < end))
     search2 = ((start > db.events.start) & (start < db.events.end))
-    entries = db(search1 | search2).select()
+    entries = db(db.events.tags.contains(tag) & (search1 | search2)).select()
     result = []
     for e in entries:
         result.append(ConflictData(e, rel_str))

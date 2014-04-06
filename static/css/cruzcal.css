@@ -1,11 +1,13 @@
 
 #banner{
-	background:black;
+	//background:black;
+	//background-size:100%;	
+    background-image:url('../images/title-bg.jpg');
+    background-repeat:repeat;
 	position:absolute;
 	left: 0;
 	right: 0;
 	height:160px;
-	background-size:100%;	
 }
 
 .login_button {
@@ -36,6 +38,7 @@ position:absolute;
 top: 27px;
 right:20px;
 }
+
 
 #signup{
 position: absolute;
