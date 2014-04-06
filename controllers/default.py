@@ -119,7 +119,7 @@ def new_event():
                             'image',
                             'details'])
     gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
-    gcal.vars.is_gcal = True
+    gcal.vars.is_gfeed = True
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
@@ -164,8 +164,9 @@ def cal_format(results):
 			editable: false,
 			events: ["""
 
+    print results
     for result in results:
-        if result.is_gcal:
+        if result.is_gfeed:
             results_html += result.google_feed
         else:
             results_html += "{"
