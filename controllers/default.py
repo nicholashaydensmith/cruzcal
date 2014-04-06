@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #########################################################################
 ## This is a sample controller
 ## - index is the default action of any application
@@ -102,7 +101,15 @@ def edit_event():
 
 #@auth.requires_membership('poster')
 def new_event():
-    form = SQLFORM(db.events)
+    form = SQLFORM(db.events, 
+                    fields=['title', 
+                            'start_time', 
+                            'end_time', 
+                            'all_day', 
+                            'tags', 
+                            'image'])
+
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall',args=[get_user_id()]))
