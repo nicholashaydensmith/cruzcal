@@ -71,7 +71,7 @@
 </head>
 
 <body>
-<div id="banner" align="center">
+  <div id="banner" align="center">
 
 	<a href="{{=URL('default', 'index')}}"><img src="{{=URL('static','images/cruzcal.png')}}" style="padding:30px;" border="0"></a>
 	{{if(auth.user == None):}}
@@ -80,7 +80,6 @@
 	{{else:}}
 		{{=A('Logout',_class='login_button', _id='logout', _href=URL('default', 'user', args=['logout'], vars = dict (_next=URL ('default', 'index'))))}}
 	{{pass}}
-
 
   <div class="container">
     <!-- Masthead ================================================== -->
@@ -109,6 +108,9 @@
         </div>
         {{pass}}
     </section><!--/main-->
+  </div>
+  <div id='copyright' align="center">Copyright © 2014</div>
+  </div>
 
   <!-- The javascript =============================================
        (Placed at the end of the document so the pages load faster) -->
