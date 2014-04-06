@@ -110,17 +110,56 @@ def new_event():
         session.flash = T('Check for errors in form.')
     return dict(form=form)
 
-def search():
-    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    results = get_tag_events(request.args[0])
+def list_format(results):
+    # If no results return early
+    if len(results) == 0:
+        return dict(search=search, results="")
+    # Test for another search
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
+
+    # Format the Text into HTML
     results_html = []
     for result in results:
         results_html.append(H1(result.title + '\n'))
-        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time) + '\n\n'))
-        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time) + '\n\n'))
-    return dict(search=search, results=P(results_html))
+        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time)))
+        for tag in result.tags:
+            results_html.append(H4(str(tag)) + " ")
+    return results_html
+
+def cal_format(results):
+    results_html = """
+	$(document).ready(function() {
+
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: false,
+			events: ["""
+            
+    for result in results:
+        results_html += "{"
+        results_html += "title:'" + result.title + "',"
+        results_html += "start:'" + str(result.start_time) + "',"
+        results_html += "end:'" + str(result.end_time) + "'"
+        results_html += "},"
+
+    results_html += "]});});"
+    return results_html
+
+def search():
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+    # Query the database
+    results = get_tag_events(request.args[0])
+    list_results_html = list_format(results)
+    cal_results_html = cal_format(results)
+    return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
 def user():
     """
