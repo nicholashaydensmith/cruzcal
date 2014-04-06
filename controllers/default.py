@@ -9,16 +9,15 @@
 #########################################################################
 
 def index():
-    message = None
-    welcome = "Welcome to CruzCal "
     
     # Is the user logged in?
     # else goto wall
-    name_or_blank = get_user_name() or ""
-    if (auth.user == None):
-        message = T(welcome + name_or_blank)
-    else:
-        redirect(URL('default','wall'))
+    if (auth.user != None):
+        entry = db(db.profile.owner_id == auth.user.id)
+        if (entry.count() == 1):
+            redirect(URL('default','edit_profile'))
+        else:
+            redirect(URL('default','wall'))
     
     events = """
 	$(document).ready(function() {
@@ -35,57 +34,24 @@ def index():
 
 	});"""
    
-    return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
+    return dict(events=SCRIPT(events, _type='text/javascript'))
 
 @auth.requires_login()
 def edit_profile():
-    # URL validation
-    u = request.args(0) or None
-    if (u == None):
-        session.flash = T('Invalid URL')
-        redirect(URL('default','index'))
-        # User validation
-        if (u != get_user_id()):
-            session.flash = T('Invalid URL')
-            redirect(URL('default','index'))
     
     g = None
     if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
-        g = request.args(1) or None
+        g = request.args(0) or None
         
     if (g == 0):
         auth.add_membership('poster')
     elif (g == 1):
         auth.add_membership('viewer')
         
-    form = SQLFORM(db.profile,
-                   record=r,
-                   fields =['name'],
-                   submit_button = 'Submit',
-                   deletable= False,
-                   showid=False)
-    
-    if (form.process().accepted):
-        session.flash = T('Success!')
-        redirect(URL('default','wall',args=[get_user_id()]))
-    else:
-        session.flash = T('Check for errors in form.')
-    return dict(form=form)
-    
-@auth.requires_login()
-def wall():       
-    return dict()
-
-@auth.requires_membership('poster')
-def edit_event():
-    return dict()
-
-@auth.requires_login
-def setup_profile():
     # check if current user has a record yet
     rec = None
     entry = db(db.profile.owner_id == auth.user.id)
-    if (entry.count() > 0):
+    if (entry.count() == 1):
         rec = entry.select().first().id # if user has a record find that table id
 
     form = None
@@ -103,11 +69,16 @@ def setup_profile():
                    submit_button = 'Update CruzCal Profile',
                    deletable=False,
                    showid = False)
-
-    if form.process().accepted:
-        session.flash = T('Sucess!')
-
+        
     return dict(form=form)
+    
+@auth.requires_login()
+def wall():       
+    return dict()
+
+@auth.requires_membership('poster')
+def edit_event():
+    return dict()
 
 def user():
     """
