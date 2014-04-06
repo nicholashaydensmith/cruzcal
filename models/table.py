@@ -5,7 +5,7 @@ from datetime import datetime
 # __CRUZ CAL TABLES__
 
 # tags
-db.define_table ('tags',
+db.define_table('tags',
                  Field('name','string')
                  )
 
@@ -19,7 +19,7 @@ db.define_table('tag_assoc',
                 )
 
 # event
-db.define_table ('events',
+db.define_table('events',
                  Field('name','string'),
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string'),
@@ -32,8 +32,8 @@ db.events.tags.widget = SQLFORM.widgets.autocomplete(
      request, db.tags.name, limitby=(0,10), min_length=2)
 
 # user
-db.define_table ('profile',
-                 Field ('name', 'string'),
+db.define_table('profile',
+                 Field ('name', 'string', default=get_user_name()),
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string')
                  )

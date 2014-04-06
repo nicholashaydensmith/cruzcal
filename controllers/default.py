@@ -11,20 +11,61 @@
 
 
 def index():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    #Grab username
-    user = "Nick"
-    user_found = False
-    if user_found:
-        return dict(message=T('Welcome to CruzCal, ' + user))
+    message = None
+    welcome = "Welcome to CruzCal "
+    
+    # Is the user logged in?
+    # else goto wall
+    name_or_blank = get_user_name() or ""
+    if (auth.user == None):
+        message = T(welcome + name_or_blank)
     else:
-        return dict(not_found=T(''))
+        redirect(URL('default','wall'))
+        
+    return dict(m = message)   
+
+@auth.requires_login()
+def edit_profile():
+    # URL validation
+    u = request.args(0) or None
+    if (u == None):
+        session.flash = T('Invalid URL')
+        redirect(URL('default','index'))
+        # User validation
+        if (u != get_user_id()):
+            session.flash = T('Invalid URL')
+            redirect(URL('default','index'))
+    
+    g = None
+    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+        g = request.args(1) or None
+        
+    if (g == 0):
+        auth.add_membership('poster')
+    elif (g == 1):
+        auth.add_membership('viewer')
+        
+    form = SQLFORM(db.profile,
+                   record=r,
+                   fields =['name'],
+                   submit_button = 'Submit',
+                   deletable= False,
+                   showid=False)
+    
+    if (form.process().accepted):
+        session.flash = T('Success!')
+        redirect(URL('default','wall',args=[get_user_id()]))
+    else:
+        session.flash = T('Check for errors in form.')
+    return dict(form=form)
+    
+@auth.requires_login()
+def wall():       
+    return dict()
+
+@auth.requires_membership('poster')
+def edit_event():
+    return dict()
 
 def user():
     """

@@ -46,6 +46,8 @@ crud, service, plugins = Crud(db), Service(), PluginManager()
 
 ## create all tables needed by auth if not custom tables
 auth.define_tables(username=False, signature=False)
+auth.add_group ('viewer','General user can\'t create events')
+auth.add_group ('poster','Can post new events')
 
 ## configure email
 mail = auth.settings.mailer
@@ -60,8 +62,8 @@ auth.settings.reset_password_requires_verification = True
 
 ## if you need to use OpenID, Facebook, MySpace, Twitter, Linkedin, etc.
 ## register with janrain.com, write your domain:api_key in private/janrain.key
-from gluon.contrib.login_methods.rpx_account import use_janrain
-use_janrain(auth, filename='private/janrain.key')
+#from gluon.contrib.login_methods.rpx_account import use_janrain
+#use_janrain(auth, filename='private/janrain.key')
 
 #########################################################################
 ## Define your tables below (or better in another model file) for example
