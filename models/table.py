@@ -31,8 +31,6 @@ db.define_table('events',
                  )
 
 db.events.owner_id.readable = False
-db.events.tags.widget = SQLFORM.widgets.autocomplete(
-     request, db.tags.name, limitby=(0,10), min_length=2)
 
 # user
 db.define_table('profile',

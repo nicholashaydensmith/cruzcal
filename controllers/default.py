@@ -15,11 +15,7 @@ def index():
     # Is the user logged in?
     # else goto wall
     if (auth.user != None):
-        entry = db(db.profile.owner_id == auth.user.id)
-        if (entry.count() == 1):
-            redirect(URL('default','edit_profile'))
-        else:
-            redirect(URL('default','wall'))
+		redirect(URL('default','wall'))
 
 
     events = """
@@ -85,6 +81,36 @@ def edit_profile():
     return dict(form=form)
 
 @auth.requires_login()
+def edit_tags() :
+	
+	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
+	form2.vars.tags = 'List a current tag to delete it.'
+	
+	list = []
+	tags = []
+	record = db(db.profile.owner_id == get_user_id()).select()
+	if (record != None and record.first() != None and record.first().tags != None):
+		tags = record.first().tags
+			
+	if (form2.process().accepted):
+		list = form2.vars.tags.split(',') or None
+		for tag in list:
+			tag = tag.lower().replace(" ", "")
+			if (tags and tag in tags):
+				tags.remove(tag)
+			else:
+				tags.append(tag)
+	else:
+		session.flash = T('Check for errors in form.')
+	
+	if (not tags):
+		tags = "No tags yet! Add some above."
+	elif(record.first() != None):
+		record.first().update_record(tags=tags)
+		
+	return dict(form2 = form2,tags=tags)
+
+@auth.requires_login()
 def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
@@ -107,24 +133,44 @@ def wall():
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
 def edit_event():
-    return dict()
+	e = request.args(0) or None
+	if (e == None):
+		redirect(URL('default','wall'))
+	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image'],submit_button = 'Update Event', showid = False )
+	
+	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
+	form2.vars.tags = 'Enter Comma Separated List'
+	list = []
+	tags = []
+	record = db.events[e]
+	if (record != None and record.tags != None):
+		tags = record.tags
+			
+	if (form2.process().accepted):
+		list = form2.vars.tags.split(',') or None
+		for tag in list:
+			if (tags and (tag not in tags)):
+				tag.replace(" ", "")
+				tags.append(tag.lower())
+	else:
+		session.flash = T('Check for errors in form.')
+		
+	if (not tags):
+		tags = "No tags yet! Add some above."
+	else:
+		record.update_record(tags=tags)
+		
+	return dict(form = form, form2 = form2,tags=tags)
 
 def new_event():
-    form = SQLFORM(db.events, 
-                    fields=['title', 
-                            'start_time', 
-                            'end_time', 
-                            'all_day', 
-                            'tags', 
-                            'image'])
-
-    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    if (form.process().accepted):
-        session.flash = T('Success!')
-        redirect(URL('default','wall',args=[get_user_id()]))
-    else:
-        session.flash = T('Check for errors in form.')
-    return dict(form=form)
+	form = SQLFORM(db.events, fields=['title','start_time','end_time','all_day','image'])
+	
+	if (form.process().accepted):
+		redirect(URL('default','edit_event',args=[form.vars.id]))
+	else:
+		session.flash = T('Check for errors in form.')
+		
+	return dict(form=form)
 
 def list_format(results):
     # If no results return early
@@ -168,14 +214,30 @@ def cal_format(results):
     return results_html
 
 def search():
-    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    if request.post_vars.search != None:
-        redirect(URL('default','search', args=[request.post_vars.search]))
-    # Query the database
-    results = get_tag_events(request.args[0])
-    list_results_html = list_format(results)
-    cal_results_html = cal_format(results)
-    return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+	# Validate URL
+	r_temp = request.args(0) or None
+	results = None
+	list_results_html = None
+	cal_results_html = None
+	
+	# Search form
+	search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+	
+	if (r_temp == None):
+		redirect(URL('default','wall'))
+	else:
+		# Query the database
+		results = get_tag_events(r_temp)
+		list_results_html = list_format(results)
+		cal_results_html = cal_format(results)
+		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+	
+	# Redirect with search form value
+	if (request.post_vars.search != None):
+		redirect(URL('default','search', args=[request.post_vars.search]))
+	
+	return dict(search=None, list_results=None,
+					cal_results=None)
 
 def user():
     """
