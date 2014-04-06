@@ -10,7 +10,7 @@ db.define_table ('tags',
                  Field ('num', 'integer')
                  )
 
-db.tags.name.unique = True
+#db.tags.name.requires = IS_NOT_IN_DB(db,'tags.name')
 
 # tag association
 db.define_table('tag_assoc',
