@@ -20,7 +20,7 @@
 	line-height:33px;
 	width:47px;
 	text-decoration:none;
-	text-align:center;
+	text-align:right;
 }.login_button:active {
 	position:relative;
 	top:1px;
@@ -30,8 +30,23 @@
 	font-style:normal;
 	text-decoration:none;
 }
+
 #login{
 position:absolute;
 top: 27px;
 right:20px;
+}
+
+#signup{
+position: absolute;
+width:62px;
+top: 48px;
+right: 20px;
+}
+
+#logout{
+position: absolute;
+top: 27px;
+right: 30px;
+text-align:right;
 }
