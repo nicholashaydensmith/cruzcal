@@ -37,7 +37,7 @@ def index():
     return dict(events=SCRIPT(events, _type='text/javascript'))
 
 def select_user():
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+    if (auth.has_membership('poster') or auth.has_membership('viewer')):
         redirect(URL('default','wall'))
         
     return dict()
@@ -46,24 +46,35 @@ def select_user():
 def edit_profile():
     
     g = None
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+    if (not (auth.has_membership('poster') or auth.has_membership('viewer'))):
         g = request.args(0) or None
-        
-    if (g == 0):
-        auth.add_membership('poster')
-    elif (g == 1):
+    
+    if (g == '0'):
         auth.add_membership('viewer')
+       
+    elif (g == '1'):
+        auth.add_membership('poster')
+      
         
-    form = SQLFORM(db.profile,
-                   record=r,
-                   fields =['name'],
-                   submit_button = 'Submit',
-                   deletable= False,
-                   showid=False)
+    entries = db(db.profile.owner_id == get_user_id()).select()
+    if (len(entries) > 0):
+        r = entries.first().id
+        form = SQLFORM(db.profile,
+                       record=r,
+                       fields =['name'],
+                       submit_button = 'Submit',
+                       deletable= False,
+                       showid=False)
+    else:
+        form = SQLFORM(db.profile,
+                       fields =['name'],
+                       submit_button = 'Submit',
+                       deletable= False,
+                       showid=False)
     
     if (form.process().accepted):
         session.flash = T('Success!')
-        redirect(URL('default','wall',args=[get_user_id()]))
+        redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form)
@@ -87,11 +98,9 @@ def wall():
    
     return dict(events=SCRIPT(events, _type='text/javascript'))
 
-@auth.requires_membership('poster')
 def edit_event():
     return dict()
 
-@auth.requires_membership('poster')
 def new_event():
     form = SQLFORM(db.events)
     if (form.process().accepted):
