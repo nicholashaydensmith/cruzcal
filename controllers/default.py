@@ -256,9 +256,8 @@ def search_date():
     if request.vars == []:
         return dict()
     tags = request.vars.tags
-    conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time);
+    conflicts = tmp_get_timing_conflicts(request.vars.start_time, request.vars.end_time)
     cal_results_html = cal_format(conflicts)
-    #URL('static','js/fullcalendar.min.js')
     return SCRIPT(cal_results_html, _type='text/javascript')
 
 def view_event():
