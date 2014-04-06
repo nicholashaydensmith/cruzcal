@@ -32,7 +32,7 @@ db.define_table('events',
                  Field ('image','upload'),
                  Field ('details', 'text'),
                  Field ('address', 'string'),
-                 Field ('city', 'string'),
+                 Field ('city', 'string', requires=IS_NOT_EMPTY()),
                  Field ('zip', 'string'),
                  )
 

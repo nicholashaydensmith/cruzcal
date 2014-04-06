@@ -292,7 +292,7 @@ def view_event():
     div = DIV(inner_html, _id="event-view")
     results_html.append(div)
     location = result.address + " " + result.city + " " + result.zip;
-    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + result.+ "\"";
+    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location + "\"";
     return dict(view_event=results_html, location_url=location_url)
 
 #
