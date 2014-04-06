@@ -9,7 +9,6 @@
 ## - call exposes all registered services (none by default)
 #########################################################################
 
-
 def index():
     """
     example action using the internationalization operator T and flash
@@ -20,7 +19,7 @@ def index():
     """
     #Grab username
     user = "Nick"
-    user_found = False
+    user_found = True
     if user_found:
         return dict(message=T('Welcome to CruzCal, ' + user))
     else:
@@ -42,6 +41,25 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
+
+def calendar():
+    events = """
+	$(document).ready(function() {
+	
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+		
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: true,
+			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
+		
+	});
+"""
+    return dict(events=SCRIPT(events, _type='text/javascript'))
+
 
 @cache.action()
 def download():
