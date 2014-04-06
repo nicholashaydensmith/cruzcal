@@ -1,4 +1,8 @@
 {{extend 'layout.html'}}
+
+<li>Add tags that you would like to subscribe to.</li>
+<li>To remove a subscription, simply type the tag you want to remove.</li>
+
 {{=form2}}
 {{if type(tags) is str:}}
 	{{=T(tags)}}
