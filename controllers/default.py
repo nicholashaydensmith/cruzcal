@@ -171,7 +171,7 @@ def new_event():
         redirect(URL('default','wall',args=[form.vars.id]))
     else:
         session.flash = T('Check for errors in form.')
-	
+
     return dict(form=form, gcal=gcal)
 
 def list_format(results):
@@ -253,14 +253,14 @@ def search():
 # Search form
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
 
-	if (r_temp == None):
-		redirect(URL('default','wall'))
-	else:
-		# Query the database
-		results = get_tag_events(r_temp)
-		list_results_html = list_format(results)
-		cal_results_html = wrap_cal(cal_format(results))
-		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+    if (r_temp == None):
+	redirect(URL('default','wall'))
+    else:
+	# Query the database
+	results = get_tag_events(r_temp)
+	list_results_html = list_format(results)
+	cal_results_html = wrap_cal(cal_format(results))
+	return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
 # Redirect with search form value
     if (request.post_vars.search != None):
