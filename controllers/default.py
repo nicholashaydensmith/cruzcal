@@ -220,30 +220,32 @@ def cal_format(results):
     return results_html
 
 def search():
-	# Validate URL
-	r_temp = request.args(0) or None
-	results = None
-	list_results_html = None
-	cal_results_html = None
+# Validate URL
+    r_temp = request.args(0) or None
+    results = None
+    list_results_html = None
+    cal_results_html = None
+    session.prev_search = r_temp
+    print r_temp
 
-	# Search form
-	search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+# Search form
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
 
-	if (r_temp == None):
-		redirect(URL('default','wall'))
-	else:
-		# Query the database
-		results = get_tag_events(r_temp)
-		list_results_html = list_format(results)
-		cal_results_html = cal_format(results)
-		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+    if (r_temp == None):
+        redirect(URL('default','wall'))
+    else:
+        # Query the database
+        results = get_tag_events(r_temp)
+        list_results_html = list_format(results)
+        cal_results_html = cal_format(results)
+        return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
-	# Redirect with search form value
-	if (request.post_vars.search != None):
-		redirect(URL('default','search', args=[request.post_vars.search]))
+# Redirect with search form value
+    if (request.post_vars.search != None):
+        redirect(URL('default','search', args=[request.post_vars.search]))
 
-	return dict(search=None, list_results=None,
-					cal_results=None)
+    return dict(search=None, list_results=None,
+                    cal_results=None)
 
 def search_date():
     if request.vars == []:
@@ -259,7 +261,7 @@ def view_event():
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    results_html = H1("")
+    results_html = A("Back to search results.", _href=URL('default', 'search', args=[session.prev_search]))
     for result in results:
         if result.image == None:
             results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
