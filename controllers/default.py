@@ -170,6 +170,9 @@ def new_event():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
+        tags = parse_input_to_tags(form.vars.tags)
+        for tag in tags:
+            db.tags.insert(name=tag, num=0)
         redirect(URL('default','wall',args=[form.vars.id]))
     else:
         session.flash = T('Check for errors in form.')
@@ -263,7 +266,7 @@ def view_event():
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    results_html = A("Back to search results.", _href=URL('default', 'search', args=[session.prev_search]))
+    results_html = A("Back to search results", _href=URL('default', 'search', args=[session.prev_search]))
     for result in results:
         if result.image == None:
             results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
