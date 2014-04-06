@@ -11,20 +11,13 @@
 
 
 def index():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    #Grab username
-    user = "Nick"
-    user_found = False
-    if user_found:
-        return dict(message=T('Welcome to CruzCal, ' + user))
+    if (auth.user == None):
+        response.flash = T("Welcome to CruzCal!")
+    elif (db(db.profile.owner_id == get_user_id()).count > 0):
+        redirect(URL('default','start',args=[get_user_id()]))
     else:
-        return dict(not_found=T(''))
+        redirect(URL('default','setup_profile',args=[get_user_id()]))
+    return dict()
 
 def user():
     """
@@ -42,6 +35,35 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
+
+@auth.requires_login
+def setup_profile():
+    # check if current user has a record yet
+    rec = None
+    entry = db(db.profile.owner_id == auth.user.id)
+    if (entry.count() > 0):
+        rec = entry.select().first().id # if user has a record find that table id
+
+    form = None
+
+    # based on if user has a record, display new or display an edit
+    if (rec == None) :
+        form = SQLFORM(db.profile,
+                   fields =['name','tags'],
+                   submit_button = 'Create CruzCal Profile',
+                   showid=False)
+    else:
+        form = SQLFORM(db.profile,
+                   fields =['name','tags'],
+                   record = rec,
+                   submit_button = 'Update CruzCal Profile',
+                   deletable=False,
+                   showid = False)
+
+    if form.process().accepted:
+        session.flash = T('Sucess!')
+
+    return dict(form=form)
 
 @cache.action()
 def download():
