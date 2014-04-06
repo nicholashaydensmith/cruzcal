@@ -141,9 +141,13 @@ def list_format(results):
     results_html = []
     for result in results:
         title = A(result.title, _href=URL('default', 'view_event', args=[result.id]))
-        inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
+        tag_str = CAT('', '')
         for tag in result.tags:
-            inner_html = inner_html + H4(str(tag)) + " "
+            tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
+            if (tag != result.tags[len(result.tags) - 1]):
+                tag_str = CAT(tag_str, ', ')
+
+        inner_html = CAT(H2(title), H4('Start Date: ', str(result.start_time)), H4('End Date: ', str(result.end_time)), CAT(H4('Tags: ', tag_str)))
 
         div = DIV(inner_html, _id="event-listing")
         results_html.append(div)
@@ -192,9 +196,13 @@ def search():
 def search_date():
     if request.vars == []:
         return dict()
+    print "0"
     tags = parse_input_to_tags(request.vars.tags)
+    print "1"
     start = datetime.strptime(request.vars.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+    print "2"
     end = datetime.strptime(request.vars.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
+    print "3"
     print start, end
     conflicts = get_timing_conflicts(tags, start, end);
     print "Conflicts", conflicts
