@@ -233,6 +233,9 @@ def search():
 
 # Search form
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+# Redirect with search form value
+    if (request.post_vars.search != None):
+        redirect(URL('default','search', args=[request.post_vars.search]))
 
     if (r_temp == None):
         redirect(URL('default','wall'))
@@ -242,10 +245,6 @@ def search():
         list_results_html = list_format(results)
         cal_results_html = cal_format(results)
         return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
-
-# Redirect with search form value
-    if (request.post_vars.search != None):
-        redirect(URL('default','search', args=[request.post_vars.search]))
 
     return dict(search=None, list_results=None,
                     cal_results=None)
