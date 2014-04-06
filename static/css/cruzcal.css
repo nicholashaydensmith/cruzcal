@@ -36,6 +36,7 @@
 position:absolute;
 top: 27px;
 right:20px;
+text-align:right;
 }
 
 
@@ -43,12 +44,20 @@ right:20px;
 position: absolute;
 top: 48px;
 right: 20px;
+text-align:right;
 }
 
 #logout{
 position: absolute;
 top: 27px;
 right: 30px;
+text-align:right;
+}
+
+#profile{
+position: absolute;
+top: 48px;
+right: 27px;
 text-align:right;
 }
 

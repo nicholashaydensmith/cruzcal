@@ -78,6 +78,7 @@
 		{{=A('Login',_class='login_button', _id='login', _href=URL('default', 'user', args=['login'], vars = dict (_next=URL ('default', 'wall'))))}}
 		{{=A('Sign Up',_class='login_button', _id='signup', _href=URL('default','user',args=['login'],vars = dict (_next=URL ('default', 'select_user'))))}}
 	{{else:}}
+		{{=A('Profile',_class='login_button', _id='profile', _href=URL('default', 'edit_profile'))}}
 		{{=A('Logout',_class='login_button', _id='logout', _href=URL('default', 'user', args=['logout'], vars = dict (_next=URL ('default', 'index'))))}}
 	{{pass}}
 
@@ -130,4 +131,3 @@
   {{pass}}
 </body>
 </html>
-

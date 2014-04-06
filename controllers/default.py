@@ -173,6 +173,7 @@ def new_event():
         redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
+	
     return dict(form=form, gcal=gcal)
 
 def list_format(results):
