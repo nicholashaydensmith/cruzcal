@@ -23,11 +23,12 @@ db.define_table('tag_assoc',
 db.define_table('events',
                  Field('title','string'),
                  Field ('owner_id',default=get_user_id()),
-                 Field ('start_time', 'date'),
-                 Field ('end_time', 'date'),
+                 Field ('start_time', 'datetime'),
+                 Field ('end_time', 'datetime'),
                  Field ('all_day', 'boolean'),
                  Field ('tags','list:string'),
-                 Field ('image','upload')
+                 Field ('image','upload'),
+                 Field ('details', 'text')
                  )
 
 db.events.owner_id.readable = False

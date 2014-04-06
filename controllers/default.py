@@ -116,7 +116,8 @@ def new_event():
                             'end_time',
                             'all_day',
                             'tags',
-                            'image'])
+                            'image',
+                            'details'])
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
@@ -137,7 +138,7 @@ def list_format(results):
     # Format the Text into HTML
     results_html = []
     for result in results:
-        title = A(result.title, _href=URL('default', 'view_event', args=[result.title]))
+        title = A(result.title, _href=URL('default', 'view_event', args=[result.id]))
         inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
         for tag in result.tags:
             inner_html = inner_html + H4(str(tag)) + " "
@@ -176,6 +177,7 @@ def search():
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
     # Query the database
+    # TODO: Only pulls out the first tag
     results = get_tag_events(request.args[0])
     logger.info(results)
     list_results_html = list_format(results)
@@ -202,9 +204,19 @@ def search_date():
 def view_event():
     if request.args == []:
         return dict()
+    
+    results = db(db.events.id == request.args[0]).select()
+    print results
+    results_html = H1("")
+    for result in results:
+        results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
+        results_html += (H1(result.title))
+        results_html += (H3(result.start_time))
+        results_html += (H3(result.end_time))
+        results_html += (P(result.details))
+        results_html += (P(result.tags))
 
-    image = db(db.events.title == request.args[0]).select().first()
-    return dict(image=image)
+    return dict(view_event=results_html)
 
 def user():
     """
