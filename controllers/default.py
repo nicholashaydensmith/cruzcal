@@ -11,6 +11,7 @@
 def index():
     message = None
     welcome = "Welcome to CruzCal "
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     
     # Is the user logged in?
     # else goto wall
@@ -34,8 +35,10 @@ def index():
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
    
-    return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
+    return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
 
 @auth.requires_login()
 def edit_profile():
@@ -74,6 +77,7 @@ def edit_profile():
     
 #@auth.requires_login()
 def wall():       
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
 	$(document).ready(function() {
 
@@ -88,8 +92,10 @@ def wall():
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
    
-    return dict(events=SCRIPT(events, _type='text/javascript'))
+    return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
 @auth.requires_membership('poster')
 def edit_event():
@@ -105,9 +111,13 @@ def new_event():
         session.flash = T('Check for errors in form.')
     return dict(form=form)
 
-def search(tag):
-    results = db(db.events.tags==tag)
-    return dict(results=results)
+def search():
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    results = get_tag_events(request.args[0])
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+
+    return dict(search=search, results=results)
 
 @auth.requires_login
 def setup_profile():
