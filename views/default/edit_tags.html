@@ -1,3 +1,9 @@
 {{extend 'layout.html'}}
 {{=form2}}
-{{=tags}}
+{{if type(tags) is str:}}
+	{{=T(tags)}}
+{{else:}}
+	{{for t in tags:}}
+		{{=B(t+", ")}}
+	{{pass}}
+{{pass}}

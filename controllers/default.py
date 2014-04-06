@@ -17,7 +17,6 @@ def index():
     if (auth.user != None):
 		redirect(URL('default','wall'))
 
-
     events = """
 	$(document).ready(function() {
 		$('#calendar').fullCalendar({
@@ -76,6 +75,8 @@ def edit_profile():
 
 @auth.requires_login()
 def edit_tags() :
+	if (get_user_id() == None):
+		redirect('default','select_user')
 
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'List a current tag to delete it.'
@@ -120,39 +121,41 @@ def wall():
 
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
+@auth.requires_login()
 def edit_event():
-	e = request.args(0) or None
-	if (e == None):
-		redirect(URL('default','wall'))
-	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
-				   submit_button = 'Update Event', showid = False)
+#	e = request.args(0) or None
+#	if (e == None):
+#		redirect(URL('default','wall'))
+#	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
+#				   submit_button = 'Update Event', showid = False)
+#	
+#	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
+#	form2.vars.tags = 'Enter Comma Separated List'
+#	list = []
+#	tags = []
+#	record = db.events[e]
+#	if (record != None and record.tags != None):
+#		tags = record.tags
+#			
+#	if (form2.process().accepted):
+#		list = form2.vars.tags.split(',') or None
+#		for tag in list:
+#			if (tags and (tag not in tags)):
+#				tag.replace(" ", "")
+#				tags.append(tag.lower())
+#	else:
+#		session.flash = T('Check for errors in form.')
+#		
+#	if (not tags):
+#		tags = "No tags yet! Add some above."
+#	else:
+#		record.update_record(tags=tags)
+#		
+	redirect(URL('default','wall'))
+	return dict()
 
-	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
-	form2.vars.tags = 'Enter Comma Separated List'
-	list = []
-	tags = []
-	record = db.events[e]
-	if (record != None and record.tags != None):
-		tags = record.tags
-
-	if (form2.process().accepted):
-		list = form2.vars.tags.split(',') or None
-		for tag in list:
-			if (tags and (tag not in tags)):
-				tag.replace(" ", "")
-				tags.append(tag.lower())
-	else:
-		session.flash = T('Check for errors in form.')
-
-	if (not tags):
-		tags = "No tags yet! Add some above."
-	else:
-		record.update_record(tags=tags)
-
-	return dict(form = form, form2 = form2,tags=tags)
-
+@auth.requires_login()
 def new_event():
-
     form = SQLFORM(db.events,
                     fields=['title',
                             'start_time',
@@ -267,14 +270,13 @@ def view_event():
             results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
 
-        #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
-        #end_date = datetime.strptime(result.end_time)
-
-        #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
-        #div_center = DIV(time_str, _id="event-list")
-        #results_html.append(div_center)
-        #results_html += (H3(result.start_time))
-        #results_html += (H3(result.end_time))
+        if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
+            time_str = H3(result.start_time.strftime("%b %d %Y"))
+        else:
+            time_str = H3(result.start_time.strftime("%b %d %Y") + " - " + result.end_time.strftime("%b %d %Y"))
+        time_str = CAT(time_str, H4(result.start_time.strftime("%I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")))
+        div_center = DIV(time_str, _id="event-list")
+        results_html.append(div_center)
 
         tag_str = CAT('', '')
         for tag in result.tags:
@@ -287,6 +289,10 @@ def view_event():
     results_html.append(div)
 
     return dict(view_event=results_html)
+
+#
+# Built in code w/ web2py
+#
 
 def user():
     """
