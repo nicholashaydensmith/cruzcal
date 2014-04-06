@@ -193,7 +193,7 @@ def list_format(results):
             if (tag != result.tags[len(result.tags) - 1]):
                 tag_str = CAT(tag_str, ', ')
 
-        inner_html = CAT(H2(title), H4('Start Date: ', str(result.start_time)), H4('End Date: ', str(result.end_time)), CAT(H4('Tags: ', tag_str)))
+        inner_html = CAT(H2(title), H4('From: ', result.start_time.strftime("%b %d, %Y %I:%M%p")), H4('To: ', result.end_time.strftime("%b %d, %Y %I:%M%p")), CAT(H4('Tags: ', tag_str)))
 
         div = DIV(inner_html, _id="event-listing")
         results_html.append(div)
@@ -271,9 +271,9 @@ def view_event():
         results_html += (H1(result.title))
 
         if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
-            time_str = H3(result.start_time.strftime("%b %d %Y"))
+            time_str = H3(result.start_time.strftime("%b %d, %Y"))
         else:
-            time_str = H3(result.start_time.strftime("%b %d %Y") + " - " + result.end_time.strftime("%b %d %Y"))
+            time_str = H3(result.start_time.strftime("%b %d, %Y") + " - " + result.end_time.strftime("%b %d, %Y"))
         time_str = CAT(time_str, H4(result.start_time.strftime("%I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")))
         div_center = DIV(time_str, _id="event-list")
         results_html.append(div_center)
