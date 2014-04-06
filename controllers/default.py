@@ -60,7 +60,7 @@ def edit_profile():
         auth.add_membership('viewer')
         
     form = SQLFORM(db.profile,
-                   record=r,
+                   record=g,
                    fields =['name'],
                    submit_button = 'Submit',
                    deletable= False,
@@ -99,7 +99,7 @@ def wall():
 def edit_event():
     return dict()
 
-@auth.requires_membership('poster')
+#@auth.requires_membership('poster')
 def new_event():
     form = SQLFORM(db.events)
     if (form.process().accepted):
@@ -114,12 +114,11 @@ def search():
     results = get_tag_events(request.args[0])
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-    results_html = ""
+    results_html = []
     for result in results:
-        results_html += result.title + '\n'
-        results_html += str(result.start_time) + '\n'
-        results_html += str(result.end_time) + '\n'
-        results_html += '\n'
+        results_html.append(H1(result.title + '\n'))
+        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time) + '\n\n'))
+        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time) + '\n\n'))
     return dict(search=search, results=P(results_html))
 
 def user():
