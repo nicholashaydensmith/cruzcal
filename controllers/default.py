@@ -53,14 +53,14 @@ def edit_profile():
     g = None
     if (not (auth.has_membership('poster') or auth.has_membership('viewer'))):
         g = request.args(0) or None
-    
+
     if (g == '0'):
         auth.add_membership('viewer')
-       
+
     elif (g == '1'):
         auth.add_membership('poster')
-      
-        
+
+
     entries = db(db.profile.owner_id == get_user_id()).select()
     if (len(entries) > 0):
         r = entries.first().id
@@ -76,7 +76,7 @@ def edit_profile():
                        submit_button = 'Submit',
                        deletable= False,
                        showid=False)
-    
+
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall'))
@@ -110,12 +110,12 @@ def edit_event():
     return dict()
 
 def new_event():
-    form = SQLFORM(db.events, 
-                    fields=['title', 
-                            'start_time', 
-                            'end_time', 
-                            'all_day', 
-                            'tags', 
+    form = SQLFORM(db.events,
+                    fields=['title',
+                            'start_time',
+                            'end_time',
+                            'all_day',
+                            'tags',
                             'image'])
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
@@ -129,7 +129,7 @@ def new_event():
 def list_format(results):
     # If no results return early
     if len(results) == 0:
-        return dict(search=search, results="")
+        return H3("No Results")
     # Test for another search
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
@@ -137,10 +137,14 @@ def list_format(results):
     # Format the Text into HTML
     results_html = []
     for result in results:
-        results_html.append(H1(result.title + '\n'))
-        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time)))
+        title = A(result.title, _href=URL('default', 'view_event', args=[result.title]))
+        inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
         for tag in result.tags:
-            results_html.append(H4(str(tag)) + " ")
+            inner_html = inner_html + H4(str(tag)) + " "
+
+        div = DIV(inner_html, _id="event-listing")
+        results_html.append(div)
+        logger.info(div)
     return results_html
 
 def cal_format(results):
@@ -156,7 +160,7 @@ def cal_format(results):
             height: 500,
 			editable: false,
 			events: ["""
-            
+
     for result in results:
         results_html += "{"
         results_html += "title:'" + result.title + "',"
@@ -173,6 +177,7 @@ def search():
         redirect(URL('default','search', args=[request.post_vars.search]))
     # Query the database
     results = get_tag_events(request.args[0])
+    logger.info(results)
     list_results_html = list_format(results)
     cal_results_html = cal_format(results)
     return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
@@ -193,6 +198,13 @@ def search_date():
     print "Results", cal_results_html
     print SCRIPT(cal_results_html, _type='text/javascript')
     return dict()
+
+def view_event():
+    if request.args == []:
+        return dict()
+
+    image = db(db.events.title == request.args[0]).select().first()
+    return dict(image=image)
 
 def user():
     """
