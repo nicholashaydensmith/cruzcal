@@ -114,8 +114,13 @@ def search():
     results = get_tag_events(request.args[0])
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-
-    return dict(search=search, results=results)
+    results_html = ""
+    for result in results:
+        results_html += result.title + '\n'
+        results_html += str(result.start_time) + '\n'
+        results_html += str(result.end_time) + '\n'
+        results_html += '\n'
+    return dict(search=search, results=P(results_html))
 
 def user():
     """
