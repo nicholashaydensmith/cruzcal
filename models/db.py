@@ -278,7 +278,7 @@ def get_related_tags(name):
 
 # 'tag' can be a single tag or an array of tags
 def get_tag_events(tag):
-    entries = db(db.events.tags.contains(tag)).select()
+    entries = db(db.events.tags.contains(tag, all=False)).select()
     result = []
     for e in entries:
         result.append(e)
