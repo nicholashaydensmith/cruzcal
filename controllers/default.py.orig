@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
 
 #########################################################################
 ## This is a sample controller
@@ -10,43 +9,163 @@
 #########################################################################
 
 def index():
+    message = None
+    welcome = "Welcome to CruzCal "
 <<<<<<< HEAD
-    if (auth.user == None):
-        response.flash = T("Welcome to CruzCal!")
-    elif (db(db.profile.owner_id == get_user_id()).count > 0):
-        redirect(URL('default','start',args=[get_user_id()]))
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    
+    # Is the user logged in?
+    # else goto wall
+    if (auth.user != None):
+        entry = db(db.profile.owner_id == auth.user.id)
+        if (entry.count() == 1):
+            redirect(URL('default','edit_profile'))
+        else:
+            redirect(URL('default','wall'))
+    
 =======
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
 
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    #Grab username
-    user = "Nick"
-    user_found = True
+    # Is the user logged in?
+    # else goto wall
+    name_or_blank = get_user_name() or ""
+    if (auth.user == None):
+        message = T(welcome + name_or_blank)
+    else:
+        redirect(URL('default','wall'))
+
+>>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
     events = """
 	$(document).ready(function() {
-	
+
 		var date = new Date();
 		var d = date.getDate();
 		var m = date.getMonth();
 		var y = date.getFullYear();
-		
+
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
-		
-	});
-    """
-    if user_found:
-        return dict(events=SCRIPT(events, _type='text/javascript'))
->>>>>>> d9ba38f813c440d710157a6010492486a62ba755
-    else:
-        redirect(URL('default','setup_profile',args=[get_user_id()]))
+
+	});"""
+<<<<<<< HEAD
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+   
+    return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
+=======
+
+    return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
+>>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+
+def select_user():
+    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+        redirect(URL('default','wall'))
+        
     return dict()
+        
+@auth.requires_login()
+def edit_profile():
+<<<<<<< HEAD
+    
+    g = None
+    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+        g = request.args(0) or None
+        
+=======
+    # URL validation
+    u = request.args(0) or None
+    if (u == None):
+        session.flash = T('Invalid URL')
+        redirect(URL('default','index'))
+        # User validation
+        if (u != get_user_id()):
+            session.flash = T('Invalid URL')
+            redirect(URL('default','index'))
+
+    g = None
+    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+        g = request.args(1) or None
+
+>>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+    if (g == 0):
+        auth.add_membership('poster')
+    elif (g == 1):
+        auth.add_membership('viewer')
+
+    form = SQLFORM(db.profile,
+                   record=r,
+                   fields =['name'],
+                   submit_button = 'Submit',
+                   deletable= False,
+                   showid=False)
+
+    if (form.process().accepted):
+        session.flash = T('Success!')
+        redirect(URL('default','wall',args=[get_user_id()]))
+    else:
+        session.flash = T('Check for errors in form.')
+    return dict(form=form)
+<<<<<<< HEAD
+    
+@auth.requires_login()
+def wall():       
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+=======
+
+#@auth.requires_login()
+def wall():
+>>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+    events = """
+	$(document).ready(function() {
+
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+
+		$('#calendar').fullCalendar({
+                        height: 500,
+			editable: true,
+			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
+
+	});"""
+<<<<<<< HEAD
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+   
+    return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
+=======
+
+    return dict(events=SCRIPT(events, _type='text/javascript'))
+>>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+
+@auth.requires_membership('poster')
+def edit_event():
+    return dict()
+
+@auth.requires_membership('poster')
+def new_event():
+    form = SQLFORM(db.events)
+    if (form.process().accepted):
+        session.flash = T('Success!')
+        redirect(URL('default','wall',args=[get_user_id()]))
+    else:
+        session.flash = T('Check for errors in form.')
+    return dict(form=form)
+
+def search():
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    results = get_tag_events(request.args[0])
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+    results_html = ""
+    for result in results:
+        results_html += result.title + '\n'
+        results_html += str(result.start_time) + '\n'
+        results_html += str(result.end_time) + '\n'
+        results_html += '\n'
+    return dict(search=search, results=P(results_html))
 
 def user():
     """
@@ -64,35 +183,6 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
-
-@auth.requires_login
-def setup_profile():
-    # check if current user has a record yet
-    rec = None
-    entry = db(db.profile.owner_id == auth.user.id)
-    if (entry.count() > 0):
-        rec = entry.select().first().id # if user has a record find that table id
-
-    form = None
-
-    # based on if user has a record, display new or display an edit
-    if (rec == None) :
-        form = SQLFORM(db.profile,
-                   fields =['name','tags'],
-                   submit_button = 'Create CruzCal Profile',
-                   showid=False)
-    else:
-        form = SQLFORM(db.profile,
-                   fields =['name','tags'],
-                   record = rec,
-                   submit_button = 'Update CruzCal Profile',
-                   deletable=False,
-                   showid = False)
-
-    if form.process().accepted:
-        session.flash = T('Sucess!')
-
-    return dict(form=form)
 
 @cache.action()
 def download():

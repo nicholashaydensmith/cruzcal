@@ -12,7 +12,7 @@ def index():
     message = None
     welcome = "Welcome to CruzCal "
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    
+
     # Is the user logged in?
     # else goto wall
     if (auth.user != None):
@@ -21,7 +21,8 @@ def index():
             redirect(URL('default','edit_profile'))
         else:
             redirect(URL('default','wall'))
-    
+
+
     events = """
 	$(document).ready(function() {
 
@@ -38,43 +39,43 @@ def index():
 	});"""
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-   
+
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
 
 def select_user():
     if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
         redirect(URL('default','wall'))
-        
+
     return dict()
-        
+
 @auth.requires_login()
 def edit_profile():
-    
+
     g = None
     if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
         g = request.args(0) or None
-        
+
     if (g == 0):
         auth.add_membership('poster')
     elif (g == 1):
         auth.add_membership('viewer')
-        
+
     form = SQLFORM(db.profile,
                    record=r,
                    fields =['name'],
                    submit_button = 'Submit',
                    deletable= False,
                    showid=False)
-    
+
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall',args=[get_user_id()]))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form)
-    
+
 @auth.requires_login()
-def wall():       
+def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
 	$(document).ready(function() {
@@ -85,14 +86,14 @@ def wall():
 		var y = date.getFullYear();
 
 		$('#calendar').fullCalendar({
-            height: 500,
+                        height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-   
+
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
 @auth.requires_membership('poster')
