@@ -9,7 +9,6 @@
 ## be redirected to HTTPS, uncomment the line below:
 # request.requires_https()
 
-import string
 import time
 from datetime import datetime
 
@@ -326,4 +325,5 @@ def get_timing_conflicts(tags, start, end):
     return conflicts
 
 def parse_input_to_tags(text):
+    import string
     return text.lower().translate(None, string.punctuation).split()
