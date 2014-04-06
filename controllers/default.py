@@ -82,6 +82,8 @@ def edit_profile():
 
 @auth.requires_login()
 def edit_tags() :
+	if (get_user_id() == None):
+		redirect('default','select_user')
 	
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'List a current tag to delete it.'
@@ -103,6 +105,7 @@ def edit_tags() :
 	else:
 		session.flash = T('Check for errors in form.')
 	
+	logger.info("%r" % record.first())
 	if (not tags):
 		tags = "No tags yet! Add some above."
 	elif(record.first() != None):
@@ -133,35 +136,36 @@ def wall():
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
 def edit_event():
-	e = request.args(0) or None
-	if (e == None):
-		redirect(URL('default','wall'))
-	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
-				   submit_button = 'Update Event', showid = False)
-	
-	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
-	form2.vars.tags = 'Enter Comma Separated List'
-	list = []
-	tags = []
-	record = db.events[e]
-	if (record != None and record.tags != None):
-		tags = record.tags
-			
-	if (form2.process().accepted):
-		list = form2.vars.tags.split(',') or None
-		for tag in list:
-			if (tags and (tag not in tags)):
-				tag.replace(" ", "")
-				tags.append(tag.lower())
-	else:
-		session.flash = T('Check for errors in form.')
-		
-	if (not tags):
-		tags = "No tags yet! Add some above."
-	else:
-		record.update_record(tags=tags)
-		
-	return dict(form = form, form2 = form2,tags=tags)
+#	e = request.args(0) or None
+#	if (e == None):
+#		redirect(URL('default','wall'))
+#	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
+#				   submit_button = 'Update Event', showid = False)
+#	
+#	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
+#	form2.vars.tags = 'Enter Comma Separated List'
+#	list = []
+#	tags = []
+#	record = db.events[e]
+#	if (record != None and record.tags != None):
+#		tags = record.tags
+#			
+#	if (form2.process().accepted):
+#		list = form2.vars.tags.split(',') or None
+#		for tag in list:
+#			if (tags and (tag not in tags)):
+#				tag.replace(" ", "")
+#				tags.append(tag.lower())
+#	else:
+#		session.flash = T('Check for errors in form.')
+#		
+#	if (not tags):
+#		tags = "No tags yet! Add some above."
+#	else:
+#		record.update_record(tags=tags)
+#		
+	redirect(URL('default','wall'))
+	return dict()
 
 def new_event():
 
@@ -179,7 +183,7 @@ def new_event():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
-        redirect(URL('default','edit_event',args=[form.vars.id]))
+        redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form, gcal=gcal)
