@@ -19,12 +19,6 @@ def index():
 
     events = """
 	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: true,
@@ -83,16 +77,16 @@ def edit_profile():
 def edit_tags() :
 	if (get_user_id() == None):
 		redirect('default','select_user')
-	
+
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'List a current tag to delete it.'
-	
+
 	list = []
 	tags = []
 	record = db(db.profile.owner_id == get_user_id()).select()
 	if (record != None and record.first() != None and record.first().tags != None):
 		tags = record.first().tags
-			
+
 	if (form2.process().accepted):
 		list = form2.vars.tags.split(',') or None
 		for tag in list:
@@ -103,12 +97,12 @@ def edit_tags() :
 				tags.append(tag)
 	else:
 		session.flash = T('Check for errors in form.')
-	
+
 	if (not tags):
 		tags = "No tags yet! Add some above."
 	elif(record.first() != None):
 		record.first().update_record(tags=tags)
-		
+
 	return dict(form2 = form2,tags=tags)
 
 @auth.requires_login()
@@ -116,12 +110,6 @@ def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
 	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
                         height: 500,
 			editable: true,
@@ -199,9 +187,13 @@ def list_format(results):
     results_html = []
     for result in results:
         title = A(result.title, _href=URL('default', 'view_event', args=[result.id]))
-        inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
+        tag_str = CAT('', '')
         for tag in result.tags:
-            inner_html = inner_html + H4(str(tag)) + " "
+            tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
+            if (tag != result.tags[len(result.tags) - 1]):
+                tag_str = CAT(tag_str, ', ')
+
+        inner_html = CAT(H2(title), H4('Start Date: ', str(result.start_time)), H4('End Date: ', str(result.end_time)), CAT(H4('Tags: ', tag_str)))
 
         div = DIV(inner_html, _id="event-listing")
         results_html.append(div)
@@ -211,18 +203,11 @@ def list_format(results):
 def cal_format(results):
     results_html = """
 	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
-            height: 500,
+                        height: 500,
 			editable: false,
 			events: ["""
 
-    print results
     for result in results:
         if result.is_gfeed:
             results_html += result.google_feed
@@ -233,7 +218,7 @@ def cal_format(results):
             results_html += "end:'" + str(result.end_time) + "'"
             results_html += "},"
 
-    results_html += "]});});"
+    results_html += "]}); });"
     return results_html
 
 def search():
@@ -242,10 +227,10 @@ def search():
 	results = None
 	list_results_html = None
 	cal_results_html = None
-	
+
 	# Search form
 	search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-	
+
 	if (r_temp == None):
 		redirect(URL('default','wall'))
 	else:
@@ -254,43 +239,57 @@ def search():
 		list_results_html = list_format(results)
 		cal_results_html = cal_format(results)
 		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
-	
+
 	# Redirect with search form value
 	if (request.post_vars.search != None):
 		redirect(URL('default','search', args=[request.post_vars.search]))
-	
+
 	return dict(search=None, list_results=None,
 					cal_results=None)
 
 def search_date():
     if request.vars == []:
         return dict()
-    tags = parse_input_to_tags(request.vars.tags)
-    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
-    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
-    print start, end
-    conflicts = get_timing_conflicts(tags, start, end);
-    print "Conflicts", conflicts
+    tags = request.vars.tags
+    conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time);
     cal_results_html = cal_format(conflicts)
-    print SCRIPT(cal_results_html, _type='text/javascript')
-    return dict()
+    #URL('static','js/fullcalendar.min.js')
+    return SCRIPT(cal_results_html, _type='text/javascript')
 
 def view_event():
     if request.args == []:
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    print results
     results_html = H1("")
     for result in results:
         results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
-        results_html += (H3(result.start_time))
-        results_html += (H3(result.end_time))
-        results_html += (P(result.details))
-        results_html += (P(result.tags))
+
+        #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
+        #end_date = datetime.strptime(result.end_time)
+
+        #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
+        #div_center = DIV(time_str, _id="event-list")
+        #results_html.append(div_center)
+        #results_html += (H3(result.start_time))
+        #results_html += (H3(result.end_time))
+
+        tag_str = CAT('', '')
+        for tag in result.tags:
+            tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
+            if (tag != result.tags[len(result.tags) - 1]):
+                tag_str = CAT(tag_str, ', ')
+
+    inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
+    div = DIV(inner_html, _id="event-view")
+    results_html.append(div)
 
     return dict(view_event=results_html)
+
+#
+# Built in code w/ web2py
+#
 
 def user():
     """

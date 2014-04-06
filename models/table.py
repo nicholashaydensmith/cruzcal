@@ -21,14 +21,14 @@ db.define_table('tag_assoc',
 
 # event
 db.define_table('events',
-                 Field ('title','string'),
+                 Field ('title','string', requires=IS_NOT_EMPTY()),
                  Field ('is_gfeed', 'boolean'),
                  Field ('google_feed', 'string'),
                  Field ('owner_id',default=get_user_id()),
-                 Field ('start_time', 'datetime'),
-                 Field ('end_time', 'datetime'),
+                 Field ('start_time', 'datetime', requires=IS_NOT_EMPTY()),
+                 Field ('end_time', 'datetime', requires=IS_NOT_EMPTY()),
                  Field ('all_day', 'boolean'),
-                 Field ('tags','list:string'),
+                 Field ('tags','list:string', requires=IS_NOT_EMPTY()),
                  Field ('image','upload'),
                  Field ('details', 'text')
                  )
