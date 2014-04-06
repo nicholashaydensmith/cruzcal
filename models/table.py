@@ -6,7 +6,8 @@ from datetime import datetime
 
 # tags
 db.define_table ('tags',
-                 Field ('name','string')
+                 Field ('name','string'),
+                 Field ('num', 'integer')
                  )
 
 db.tags.name.unique = True

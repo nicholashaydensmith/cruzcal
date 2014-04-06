@@ -236,3 +236,28 @@ current.logger = logger
 # Let's log the user. 
 logger.info("User: %r" % get_user_email())
 logger.info("ID: %r" % get_user_id())
+
+
+##################################
+### Tag Functions
+##################################
+
+def get_relation_strength(name, tag_assoc):
+    if (name == tag_assoc.to_):
+        other = db(db.tags.name == tag_assoc.from_).select().first()
+    elif (name == tag_assoc.from_):
+        other = db(db.tags.name == tag_assoc.to_).select().first()
+    else: return 0
+    return tag_assoc.num / other.num
+
+class tag_data:
+    def init_tag_data(name1, name2, rel_str):
+        self.n1 = name1
+        self.n2 = name2
+        self.rel_str = rel_str
+    
+def get_related_tags(name):
+    entries = db((db.tag_assoc.to_ == name) | (db.tag_assoc.from_ == name)).select()
+    result = []
+    for e in entries:
+        pass
