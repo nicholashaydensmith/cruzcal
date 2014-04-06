@@ -1,6 +1,4 @@
 {{extend 'layout.html'}}
 
-{{=FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit'))}}
-
 {{=HTML(events)}}
 <div id='calendar'></div>

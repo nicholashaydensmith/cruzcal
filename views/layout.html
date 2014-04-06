@@ -72,21 +72,18 @@
 
 <body>
 <div id="banner" align="center">
-	<img src="../static/images/cruzcal.png" style="padding:30px;">
-	<a class="login_button" id="login">Login</a>
+
+	<a href="{{=URL('default', 'index')}}"><img src="{{=URL('static','images/cruzcal.png')}}" style="padding:30px;" border="0"></a>
+	{{if(auth.user == None):}}
+		{{=A('Login',_class='login_button', _id='login', _href=URL('default', 'user', args=['login'],vars = dict (_next=URL ('default', 'wall'))))}}
+		{{=A('Sign Up',_class='login_button', _id='signup', _href=URL('default','user',args=['login'],vars = dict (_next=URL ('default', 'select_user'))))}}
+	{{else:}}
+		{{=A('Logout',_class='login_button', _id='logout', _href=URL('default', 'user', args=['logout'], vars = dict (_next=URL ('default', 'index'))))}}
+	{{pass}}
+
+
   <div class="container">
     <!-- Masthead ================================================== -->
-    <header class="mastheader row" id="header" align="left">
-	
-      {{if response.title:}}
-        <div class="span12">
-            <div class="page-header">
-			{{=FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit'))}}
-            </div>
-        </div>
-	{{pass}}
-    </header>
-
     <section id="main" class="main row">
         {{if left_sidebar_enabled:}}
         <div class="span3 left-sidebar">
