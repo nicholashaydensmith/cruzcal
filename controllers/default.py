@@ -146,6 +146,19 @@ def edit_event():
 	redirect(URL('default','wall'))
 	return dict()
 
+def update_tag(tags):
+	if type(tags) != list:
+		tags = [tags]
+	for t in tags:
+		rows = db(db.tags.name == t).select()
+		if len(rows) < 1 :
+			db.tags.insert(name=t, num=1)
+		else:
+			for r in rows:
+				r.num = r.num + 1
+				r.update_record()
+	return None
+
 @auth.requires_login()
 def new_event():
     form = SQLFORM(db.events,
@@ -155,14 +168,18 @@ def new_event():
                             'all_day',
                             'tags',
                             'image',
+                            'address',
+                            'city',
+                            'zip',
                             'details'])
     gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
     gcal.vars.is_gfeed = True
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
-        session.flash = T('Success!')
-        redirect(URL('default','wall',args=[form.vars.id]))
+		update_tag( form.vars.tags )
+		session.flash = T('Success!')
+		redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
 
@@ -246,6 +263,9 @@ def search():
 
 # Search form
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+# Redirect with search form value
+    if (request.post_vars.search != None):
+        redirect(URL('default','search', args=[request.post_vars.search]))
 
     if (r_temp == None):
 	redirect(URL('default','wall'))
@@ -256,10 +276,6 @@ def search():
 	cal_results_html = wrap_cal(cal_format(results))
 	return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
-# Redirect with search form value
-    if (request.post_vars.search != None):
-        redirect(URL('default','search', args=[request.post_vars.search]))
-
     return dict(search=None, list_results=None,
                     cal_results=None)
 
@@ -267,9 +283,8 @@ def search_date():
     if request.vars == []:
         return dict()
     tags = request.vars.tags
-    conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time);
-    cal_results_html = wrap_cal(cal_format(conflicts))
-    #URL('static','js/fullcalendar.min.js')
+    conflicts = tmp_get_timing_conflicts(request.vars.start_time, request.vars.end_time)
+    cal_results_html = cal_format(conflicts)
     return SCRIPT(cal_results_html, _type='text/javascript')
 
 def view_event():
@@ -300,8 +315,18 @@ def view_event():
     inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
     div = DIV(inner_html, _id="event-view")
     results_html.append(div)
-
-    return dict(view_event=results_html)
+    address = ""
+    city = ""
+    zipcode = ""
+    if result.address != None:
+        address = result.address
+    if result.city != None:
+        city = result.city
+    if result.zip != None:
+        zipcode = result.zip
+    location = address + " " + city + " " + zipcode;
+    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location + "\"";
+    return dict(view_event=results_html, location_url=location_url)
 
 #
 # Built in code w/ web2py

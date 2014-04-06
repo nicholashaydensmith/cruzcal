@@ -10,7 +10,7 @@ db.define_table ('tags',
                  Field ('num', 'integer')
                  )
 
-db.tags.name.unique = True
+#db.tags.name.requires = IS_NOT_IN_DB(db,'tags.name')
 
 # tag association
 db.define_table('tag_assoc',
@@ -30,7 +30,10 @@ db.define_table('events',
                  Field ('all_day', 'boolean'),
                  Field ('tags','list:string', requires=IS_NOT_EMPTY()),
                  Field ('image','upload'),
-                 Field ('details', 'text')
+                 Field ('details', 'text'),
+                 Field ('address', 'string'),
+                 Field ('city', 'string', requires=IS_NOT_EMPTY()),
+                 Field ('zip', 'string'),
                  )
 
 db.events.owner_id.readable = False

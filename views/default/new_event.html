@@ -11,10 +11,11 @@ $(document).ready(function() {
         $("#conflict_container").show();
         ajax('search_date', ['start_time', 'end_time', 'tags'], 'js');
 
-		$('#calendar').fullCalendar({
+		/*$('#calendar').fullCalendar({
             height: 500,
 			editable: false,
 			events: ''});
+        */
     });
 
     $("#gcal_feed").hide();
