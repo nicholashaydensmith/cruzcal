@@ -263,13 +263,13 @@ def search():
         redirect(URL('default','search', args=[request.post_vars.search]))
 
     if (r_temp == None):
-	redirect(URL('default','wall'))
+        redirect(URL('default','wall'))
     else:
 	# Query the database
-	results = get_tag_events(r_temp)
-	list_results_html = list_format(results)
-	cal_results_html = wrap_cal(cal_format(results))
-	return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+        results = get_tag_events(r_temp)
+        list_results_html = list_format(results)
+        cal_results_html = wrap_cal(cal_format(results))
+        return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
     return dict(search=None, list_results=None,
                     cal_results=None)
