@@ -170,7 +170,7 @@ def new_event():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
-        redirect(URL('default','wall'))
+        redirect(URL('default','wall',args=[form.vars.id]))
     else:
         session.flash = T('Check for errors in form.')
 	
@@ -193,8 +193,10 @@ def list_format(results):
             tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
             if (tag != result.tags[len(result.tags) - 1]):
                 tag_str = CAT(tag_str, ', ')
-
-        inner_html = CAT(H2(title), H4('Start Date: ', str(result.start_time)), H4('End Date: ', str(result.end_time)), CAT(H4('Tags: ', tag_str)))
+        if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
+            inner_html = CAT(H2(title), H4(result.start_time.strftime("%b %d, %Y %I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")), CAT(H4('Tags: ', tag_str)))
+        else:
+            inner_html = CAT(H2(title), H4('From: ', result.start_time.strftime("%b %d, %Y %I:%M%p")), H4('To: ', result.end_time.strftime("%b %d, %Y %I:%M%p")), CAT(H4('Tags: ', tag_str)))
 
         div = DIV(inner_html, _id="event-listing")
         results_html.append(div)
@@ -216,37 +218,40 @@ def cal_format(results):
             results_html += "{"
             results_html += "title:'" + result.title + "',"
             results_html += "start:'" + str(result.start_time) + "',"
-            results_html += "end:'" + str(result.end_time) + "'"
+            results_html += "end:'" + str(result.end_time) + "',"
+            results_html += "url:'" + URL('default','view_event', args=[result.id]) + "',"
             results_html += "},"
 
     results_html += "]}); });"
     return results_html
 
 def search():
-	# Validate URL
-	r_temp = request.args(0) or None
-	results = None
-	list_results_html = None
-	cal_results_html = None
+# Validate URL
+    r_temp = request.args(0) or None
+    results = None
+    list_results_html = None
+    cal_results_html = None
+    session.prev_search = r_temp
+    print get_related_tags(r_temp)
 
-	# Search form
-	search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+# Search form
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
 
-	if (r_temp == None):
-		redirect(URL('default','wall'))
-	else:
-		# Query the database
-		results = get_tag_events(r_temp)
-		list_results_html = list_format(results)
-		cal_results_html = cal_format(results)
-		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+    if (r_temp == None):
+        redirect(URL('default','wall'))
+    else:
+        # Query the database
+        results = get_tag_events(r_temp)
+        list_results_html = list_format(results)
+        cal_results_html = cal_format(results)
+        return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
-	# Redirect with search form value
-	if (request.post_vars.search != None):
-		redirect(URL('default','search', args=[request.post_vars.search]))
+# Redirect with search form value
+    if (request.post_vars.search != None):
+        redirect(URL('default','search', args=[request.post_vars.search]))
 
-	return dict(search=None, list_results=None,
-					cal_results=None)
+    return dict(search=None, list_results=None,
+                    cal_results=None)
 
 def search_date():
     if request.vars == []:
@@ -262,19 +267,19 @@ def view_event():
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    results_html = H1("")
+    results_html = A("Back to search results", _href=URL('default', 'search', args=[session.prev_search]))
     for result in results:
-        results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
+        if result.image == None:
+            results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
 
-        #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
-        #end_date = datetime.strptime(result.end_time)
-
-        #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
-        #div_center = DIV(time_str, _id="event-list")
-        #results_html.append(div_center)
-        #results_html += (H3(result.start_time))
-        #results_html += (H3(result.end_time))
+        if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
+            time_str = H3(result.start_time.strftime("%b %d, %Y"))
+        else:
+            time_str = H3(result.start_time.strftime("%b %d, %Y") + " - " + result.end_time.strftime("%b %d, %Y"))
+        time_str = CAT(time_str, H4(result.start_time.strftime("%I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")))
+        div_center = DIV(time_str, _id="event-list")
+        results_html.append(div_center)
 
         tag_str = CAT('', '')
         for tag in result.tags:
