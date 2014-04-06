@@ -171,6 +171,7 @@ def new_event():
         redirect(URL('default','wall',args=[form.vars.id]))
     else:
         session.flash = T('Check for errors in form.')
+	
     return dict(form=form, gcal=gcal)
 
 def list_format(results):
@@ -282,7 +283,7 @@ def view_event():
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    results_html = A("Back to search results.", _href=URL('default', 'search', args=[session.prev_search]))
+    results_html = A("Back to search results", _href=URL('default', 'search', args=[session.prev_search]))
     for result in results:
         if result.image == None:
             results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))

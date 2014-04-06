@@ -21,11 +21,19 @@ $(document).ready(function() {
 </script>
 <div align="left">
 <table border="0"> <tr>
+<<<<<<< HEAD
 	<td> <form>
 		<input id="all_button" type="submit" value="All">
 	</form> </td>
 	<td> <form>
 		<input id="my_button" type="submit" value="My Calendar">
+=======
+	<td> <form action="{{=URL('default','index')}}">
+		<input type="submit" value="All">
+	</form> </td>
+	<td> <form action="{{=URL('default','wall')}}">
+		<input type="submit" value="My Calendar">
+>>>>>>> c42b5b744452ba339bc7fb19bd03d8ef2bd7fc68
 	</form> </td>
     <td> <form action="{{=URL('default','new_event')}}">
 		<input type="submit" value="Add Event">
