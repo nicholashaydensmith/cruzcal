@@ -21,7 +21,7 @@ def index():
     events = """
 	$(document).ready(function() {
 		$('#calendar').fullCalendar({
-            height: 500,
+                        height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
@@ -107,18 +107,16 @@ def edit_tags() :
 @auth.requires_login()
 def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    events = """
-	$(document).ready(function() {
-		$('#calendar').fullCalendar({
-                        height: 500,
-			editable: true,
-			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
-	});"""
+    user_id = get_user_id()
+    user_tags = db(db.profile.owner_id == user_id).select().first().tags
+    results = get_tag_events(user_tags)
+    cal_results_html = wrap_cal(cal_format(results))
+
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
 
-    return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
+    return dict(search=search, events=SCRIPT(cal_results_html, _type='text/javascript'), get_all_cal=get_all_cal(), get_your_cal=get_your_cal())
 
 def edit_event():
 	e = request.args(0) or None
@@ -197,9 +195,27 @@ def list_format(results):
         logger.info(div)
     return results_html
 
+def get_all_cal():
+    user_tags_db = db(db.tags.id != -1).select()
+    user_tags = []
+    for tag in user_tags_db:
+        user_tags.append(tag)
+    results = get_tag_events(user_tags)
+    print "All results", results
+    return cal_format(results)
+
+def get_your_cal():
+    user_id = get_user_id()
+    user_tags = db(db.profile.owner_id == user_id).select().first().tags
+    results = get_tag_events(user_tags)
+    return cal_format(results)
+
+def wrap_cal(cal_html):
+    return "$(document).ready(function() {" + cal_html + "});"
+
+
 def cal_format(results):
     results_html = """
-	$(document).ready(function() {
 		$('#calendar').fullCalendar({
                         height: 500,
 			editable: false,
@@ -215,7 +231,7 @@ def cal_format(results):
             results_html += "end:'" + str(result.end_time) + "'"
             results_html += "},"
 
-    results_html += "]}); });"
+    results_html += "]});"
     return results_html
 
 def search():
@@ -234,7 +250,7 @@ def search():
 		# Query the database
 		results = get_tag_events(r_temp)
 		list_results_html = list_format(results)
-		cal_results_html = cal_format(results)
+		cal_results_html = wrap_cal(cal_format(results))
 		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
 	# Redirect with search form value
@@ -249,7 +265,7 @@ def search_date():
         return dict()
     tags = request.vars.tags
     conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time);
-    cal_results_html = cal_format(conflicts)
+    cal_results_html = wrap_cal(cal_format(conflicts))
     #URL('static','js/fullcalendar.min.js')
     return SCRIPT(cal_results_html, _type='text/javascript')
 
