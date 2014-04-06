@@ -67,11 +67,15 @@ text-decoration: none;
 }
 
 #event-listing{
-border-width: 1px;
+border-width: 2px;
 border-radius: 8px;
-border-color: #5A5A5A;
+border-color: #8E8E8E;
 border-style: solid;
 
 width: 720px;
 margin: 12px;
+}
+
+#event-listing:hover{
+border-color: #4872ED;
 }
