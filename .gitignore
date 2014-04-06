@@ -3,6 +3,7 @@ cache/*
 databases/*
 errors/*
 sessions/*
+*.swp
 *.pyc
 *.bak
 *.DS_Store
