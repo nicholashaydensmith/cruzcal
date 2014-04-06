@@ -8,11 +8,12 @@ $(document).ready(function() {
         var end_time = form[2].value;
         var tags = form[3].value;
         $("#conflict_container").show();
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-        ajax('search_date', ['start_time', 'end_time', 'tags'], ':eval');
+        ajax('search_date', ['start_time', 'end_time', 'tags'], 'js');
+
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: false,
+			events: ''});
 
     });
     $("#gcal_feed").hide();
@@ -37,4 +38,4 @@ $(document).ready(function() {
 <form>
 <input id="conflict_button" type="button" value="Check this event for time conflicts" >
 </form>
-<div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="calendar"></div></div>
+<div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="js"></div><div id="calendar"></div></div>

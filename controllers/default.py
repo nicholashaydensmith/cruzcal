@@ -20,12 +20,6 @@ def index():
 
     events = """
 	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: true,
@@ -115,12 +109,6 @@ def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
 	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
                         height: 500,
 			editable: true,
@@ -207,19 +195,11 @@ def list_format(results):
 
 def cal_format(results):
     results_html = """
-	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: false,
 			events: ["""
 
-    print results
     for result in results:
         if result.is_gfeed:
             results_html += result.google_feed
@@ -230,7 +210,7 @@ def cal_format(results):
             results_html += "end:'" + str(result.end_time) + "'"
             results_html += "},"
 
-    results_html += "]});});"
+    results_html += "]});"
     return results_html
 
 def search():
@@ -262,22 +242,17 @@ def search():
 def search_date():
     if request.vars == []:
         return dict()
-    tags = parse_input_to_tags(request.vars.tags)
-    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
-    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
-    print start, end
-    conflicts = get_timing_conflicts(tags, start, end);
-    print "Conflicts", conflicts
+    tags = request.vars.tags
+    conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time);
     cal_results_html = cal_format(conflicts)
-    print SCRIPT(cal_results_html, _type='text/javascript')
-    return dict()
+    #URL('static','js/fullcalendar.min.js')
+    return SCRIPT(cal_results_html, _type='text/javascript')
 
 def view_event():
     if request.args == []:
         return dict()
 
     results = db(db.events.id == request.args[0]).select()
-    print results
     results_html = H1("")
     for result in results:
         results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
