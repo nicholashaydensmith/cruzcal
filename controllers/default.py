@@ -11,7 +11,7 @@
 def index():
     message = None
     welcome = "Welcome to CruzCal "
-    
+
     # Is the user logged in?
     # else goto wall
     name_or_blank = get_user_name() or ""
@@ -19,7 +19,7 @@ def index():
         message = T(welcome + name_or_blank)
     else:
         redirect(URL('default','wall'))
-    
+
     events = """
 	$(document).ready(function() {
 
@@ -34,7 +34,7 @@ def index():
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
-   
+
     return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
 
 @auth.requires_login()
@@ -48,32 +48,32 @@ def edit_profile():
         if (u != get_user_id()):
             session.flash = T('Invalid URL')
             redirect(URL('default','index'))
-    
+
     g = None
     if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
         g = request.args(1) or None
-        
+
     if (g == 0):
         auth.add_membership('poster')
     elif (g == 1):
         auth.add_membership('viewer')
-        
+
     form = SQLFORM(db.profile,
                    record=r,
                    fields =['name'],
                    submit_button = 'Submit',
                    deletable= False,
                    showid=False)
-    
+
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall',args=[get_user_id()]))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form)
-    
+
 #@auth.requires_login()
-def wall():       
+def wall():
     events = """
 	$(document).ready(function() {
 
@@ -83,12 +83,12 @@ def wall():
 		var y = date.getFullYear();
 
 		$('#calendar').fullCalendar({
-            height: 500,
+                        height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
-   
+
     return dict(events=SCRIPT(events, _type='text/javascript'))
 
 @auth.requires_membership('poster')

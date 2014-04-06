@@ -9,6 +9,8 @@
 ## be redirected to HTTPS, uncomment the line below:
 # request.requires_https()
 
+import string
+
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
     db = DAL('sqlite://storage.sqlite',pool_size=1,check_reserved=['all'])
@@ -319,3 +321,6 @@ def get_timing_conflicts(tags, start, end):
     for tag_data in rel_tag_data:
         conflicts = conflicts + get_tag_conflicts(tag_data.name, tag_data.rel_str, start, end)
     return conflicts
+
+def parse_input_to_tags(text):
+    return text.lower().translate(None, string.punctuation).split()
