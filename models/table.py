@@ -14,25 +14,23 @@ db.tags.name.unique = True
 
 # tag association
 db.define_table('tag_assoc',
-                Field('to_','reference tags'),
-                Field('from_','reference tags'),
+                Field('to_','string'),
+                Field('from_','string'),
                 Field('num','integer')
                 )
 
 # event
 db.define_table('events',
-                 Field('title','string'),
+                 Field ('title','string'),
                  Field ('owner_id',default=get_user_id()),
-                 Field ('start_time', 'date'),
-                 Field ('end_time', 'date'),
+                 Field ('start_time', 'datetime'),
+                 Field ('end_time', 'datetime'),
                  Field ('all_day', 'boolean'),
                  Field ('tags','list:string'),
                  Field ('image','upload')
                  )
 
 db.events.owner_id.readable = False
-db.events.tags.widget = SQLFORM.widgets.autocomplete(
-     request, db.tags.name, limitby=(0,10), min_length=2)
 
 # user
 db.define_table('profile',

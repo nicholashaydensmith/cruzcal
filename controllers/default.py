@@ -176,23 +176,25 @@ def search():
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
     # Query the database
-    results = get_tag_events(request.args[0])
-    logger.info(results)
+    results = get_tag_events(parse_input_to_tags(request.args[0]))
+    logger.info(parse_input_to_tags(request.args[0]))
     list_results_html = list_format(results)
     cal_results_html = cal_format(results)
     return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
 def search_date():
-    tag = request.vars.tags
-    tags = []
-    tags.append(tag)
+    if request.vars == []:
+        return dict()
+    tags = parse_input_to_tags(request.vars.tags)
     import time
-    import datetime
-    start = time.mktime(datetime.datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple())
-    end = time.mktime(datetime.datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple())
+    from datetime import datetime
+    print "00"
+    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple()
+    print "01"
+    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple()
     print start, end
     print "a"
-    conflicts = get_timing_conflicts(tags, int(start), int(end));
+    conflicts = get_timing_conflicts(tags, start, end);
     print "b"
     cal_results_html = cal_format(conflicts)
     print "Results", cal_results_html
@@ -203,7 +205,7 @@ def view_event():
     if request.args == []:
         return dict()
 
-    image = db(db.events.title == request.args[0]).select().first()
+    image = db(db.events.title == request.args[0]).select().first().image
     return dict(image=image)
 
 def user():
