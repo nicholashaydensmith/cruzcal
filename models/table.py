@@ -22,6 +22,8 @@ db.define_table('tag_assoc',
 # event
 db.define_table('events',
                  Field('title','string'),
+                 Field ('is_gfeed', 'boolean'),
+                 Field ('google_feed', 'string'),
                  Field ('owner_id',default=get_user_id()),
                  Field ('start_time', 'datetime'),
                  Field ('end_time', 'datetime'),

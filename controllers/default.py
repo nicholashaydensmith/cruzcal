@@ -118,6 +118,8 @@ def new_event():
                             'tags',
                             'image',
                             'details'])
+    gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
+    gcal.vars.is_gcal = True
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
@@ -125,7 +127,7 @@ def new_event():
         redirect(URL('default','wall',args=[get_user_id()]))
     else:
         session.flash = T('Check for errors in form.')
-    return dict(form=form)
+    return dict(form=form, gcal=gcal)
 
 def list_format(results):
     # If no results return early
@@ -163,11 +165,14 @@ def cal_format(results):
 			events: ["""
 
     for result in results:
-        results_html += "{"
-        results_html += "title:'" + result.title + "',"
-        results_html += "start:'" + str(result.start_time) + "',"
-        results_html += "end:'" + str(result.end_time) + "'"
-        results_html += "},"
+        if result.is_gcal:
+            results_html += result.google_feed
+        else:
+            results_html += "{"
+            results_html += "title:'" + result.title + "',"
+            results_html += "start:'" + str(result.start_time) + "',"
+            results_html += "end:'" + str(result.end_time) + "'"
+            results_html += "},"
 
     results_html += "]});});"
     return results_html

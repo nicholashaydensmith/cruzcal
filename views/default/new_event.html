@@ -16,11 +16,26 @@ $(document).ready(function() {
         ajax('search_date', ['start_time', 'end_time', 'tags'], ':eval');
 
     });
+    $("#gcal_feed").hide();
+    $("#gcal_feed_button").click(function(){
+        $("#new_event").hide();
+        $("#gcal_feed").show();
+        $("#new_event_button").css("color", "#9A9A98");
+        $("#gcal_feed_button").css("color", "#4876ED");
+    });
+    $("#new_event_button").click(function(){
+        $("#gcal_feed").hide();
+        $("#new_event").show();
+        $("#gcal_feed_button").css("color", "#9A9A98");
+        $("#new_event_button").css("color", "#4876ED");
+    });
 });
 </script>
-{{=form}}
+<h2>New Event</h2>
+<a id="new_event_button" href="#" >New Event</a>&nbsp|&nbsp<a id="gcal_feed_button" href="#">Google Calendar Feed</a>
+<div id="new_event">{{=form}}</div>
+<div id="gcal_feed">{{=gcal}}</div>
 <form>
 <input id="conflict_button" type="button" value="Check this event for time conflicts" >
 </form>
-<div name="dubious"></div>
 <div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="calendar"></div></div>
