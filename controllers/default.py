@@ -49,14 +49,14 @@ def edit_profile():
     g = None
     if (not (auth.has_membership('poster') or auth.has_membership('viewer'))):
         g = request.args(0) or None
-    
+
     if (g == '0'):
         auth.add_membership('viewer')
-       
+
     elif (g == '1'):
         auth.add_membership('poster')
-      
-        
+
+
     entries = db(db.profile.owner_id == get_user_id()).select()
     if (len(entries) > 0):
         r = entries.first().id
@@ -72,7 +72,7 @@ def edit_profile():
                        submit_button = 'Submit',
                        deletable= False,
                        showid=False)
-    
+
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall'))
@@ -136,7 +136,8 @@ def edit_event():
 	e = request.args(0) or None
 	if (e == None):
 		redirect(URL('default','wall'))
-	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image'],submit_button = 'Update Event', showid = False )
+	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
+				   submit_button = 'Update Event', showid = False)
 	
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'Enter Comma Separated List'
@@ -163,19 +164,30 @@ def edit_event():
 	return dict(form = form, form2 = form2,tags=tags)
 
 def new_event():
-	form = SQLFORM(db.events, fields=['title','start_time','end_time','all_day','image'])
-	
-	if (form.process().accepted):
-		redirect(URL('default','edit_event',args=[form.vars.id]))
-	else:
-		session.flash = T('Check for errors in form.')
-		
-	return dict(form=form)
+
+    form = SQLFORM(db.events,
+                    fields=['title',
+                            'start_time',
+                            'end_time',
+                            'all_day',
+                            'tags',
+                            'image',
+                            'details'])
+    gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
+    gcal.vars.is_gfeed = True
+
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    if (form.process().accepted):
+        session.flash = T('Success!')
+        redirect(URL('default','edit_event',args=[form.vars.id]))
+    else:
+        session.flash = T('Check for errors in form.')
+    return dict(form=form, gcal=gcal)
 
 def list_format(results):
     # If no results return early
     if len(results) == 0:
-        return dict(search=search, results="")
+        return H3("No Results")
     # Test for another search
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
@@ -183,10 +195,14 @@ def list_format(results):
     # Format the Text into HTML
     results_html = []
     for result in results:
-        results_html.append(H1(result.title + '\n'))
-        results_html.append(H4(str(result.start_time) + ', ' + str(result.end_time)))
+        title = A(result.title, _href=URL('default', 'view_event', args=[result.id]))
+        inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
         for tag in result.tags:
-            results_html.append(H4(str(tag)) + " ")
+            inner_html = inner_html + H4(str(tag)) + " "
+
+        div = DIV(inner_html, _id="event-listing")
+        results_html.append(div)
+        logger.info(div)
     return results_html
 
 def cal_format(results):
@@ -202,13 +218,17 @@ def cal_format(results):
             height: 500,
 			editable: false,
 			events: ["""
-            
+
+    print results
     for result in results:
-        results_html += "{"
-        results_html += "title:'" + result.title + "',"
-        results_html += "start:'" + str(result.start_time) + "',"
-        results_html += "end:'" + str(result.end_time) + "'"
-        results_html += "},"
+        if result.is_gfeed:
+            results_html += result.google_feed
+        else:
+            results_html += "{"
+            results_html += "title:'" + result.title + "',"
+            results_html += "start:'" + str(result.start_time) + "',"
+            results_html += "end:'" + str(result.end_time) + "'"
+            results_html += "},"
 
     results_html += "]});});"
     return results_html
@@ -239,6 +259,40 @@ def search():
 	return dict(search=None, list_results=None,
 					cal_results=None)
 
+def search_date():
+    tag = request.vars.tags
+    tags = []
+    tags.append(tag)
+    import time
+    import datetime
+    start = time.mktime(datetime.datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple())
+    end = time.mktime(datetime.datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple())
+    print start, end
+    print "a"
+    conflicts = get_timing_conflicts(tags, int(start), int(end));
+    print "b"
+    cal_results_html = cal_format(conflicts)
+    print "Results", cal_results_html
+    print SCRIPT(cal_results_html, _type='text/javascript')
+    return dict()
+
+def view_event():
+    if request.args == []:
+        return dict()
+    
+    results = db(db.events.id == request.args[0]).select()
+    print results
+    results_html = H1("")
+    for result in results:
+        results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
+        results_html += (H1(result.title))
+        results_html += (H3(result.start_time))
+        results_html += (H3(result.end_time))
+        results_html += (P(result.details))
+        results_html += (P(result.tags))
+
+    return dict(view_event=results_html)
+
 def user():
     """
     exposes:
@@ -255,6 +309,7 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
+
 
 @cache.action()
 def download():

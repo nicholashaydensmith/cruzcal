@@ -1,2 +1,40 @@
 {{extend 'layout.html'}}
-{{=form}}
+<script>
+$(document).ready(function() {
+    $("#conflict_container").hide();
+    $("#conflict_button").click(function(){
+        var form = $('form').serializeArray();
+        var start_time = form[1].value;
+        var end_time = form[2].value;
+        var tags = form[3].value;
+        $("#conflict_container").show();
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+        ajax('search_date', ['start_time', 'end_time', 'tags'], ':eval');
+
+    });
+    $("#gcal_feed").hide();
+    $("#gcal_feed_button").click(function(){
+        $("#new_event").hide();
+        $("#gcal_feed").show();
+        $("#new_event_button").css("color", "#9A9A98");
+        $("#gcal_feed_button").css("color", "#4876ED");
+    });
+    $("#new_event_button").click(function(){
+        $("#gcal_feed").hide();
+        $("#new_event").show();
+        $("#gcal_feed_button").css("color", "#9A9A98");
+        $("#new_event_button").css("color", "#4876ED");
+    });
+});
+</script>
+<h2>New Event</h2>
+<a id="new_event_button" href="#" >New Event</a>&nbsp|&nbsp<a id="gcal_feed_button" href="#">Google Calendar Feed</a>
+<div id="new_event">{{=form}}</div>
+<div id="gcal_feed">{{=gcal}}</div>
+<form>
+<input id="conflict_button" type="button" value="Check this event for time conflicts" >
+</form>
+<div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="calendar"></div></div>

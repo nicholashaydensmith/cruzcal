@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #########################################################################
 ## This is a sample controller
 ## - index is the default action of any application
@@ -11,9 +10,8 @@
 def index():
     message = None
     welcome = "Welcome to CruzCal "
-<<<<<<< HEAD
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    
+
     # Is the user logged in?
     # else goto wall
     if (auth.user != None):
@@ -22,18 +20,8 @@ def index():
             redirect(URL('default','edit_profile'))
         else:
             redirect(URL('default','wall'))
-    
-=======
 
-    # Is the user logged in?
-    # else goto wall
-    name_or_blank = get_user_name() or ""
-    if (auth.user == None):
-        message = T(welcome + name_or_blank)
-    else:
-        redirect(URL('default','wall'))
 
->>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
     events = """
 	$(document).ready(function() {
 
@@ -48,74 +36,57 @@ def index():
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
-<<<<<<< HEAD
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-   
-    return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
-=======
 
-    return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
->>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+    return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
 
 def select_user():
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+    if (auth.has_membership('poster') or auth.has_membership('viewer')):
         redirect(URL('default','wall'))
-        
+
     return dict()
-        
+
 @auth.requires_login()
 def edit_profile():
-<<<<<<< HEAD
-    
+
     g = None
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
+    if (not (auth.has_membership('poster') or auth.has_membership('viewer'))):
         g = request.args(0) or None
-        
-=======
-    # URL validation
-    u = request.args(0) or None
-    if (u == None):
-        session.flash = T('Invalid URL')
-        redirect(URL('default','index'))
-        # User validation
-        if (u != get_user_id()):
-            session.flash = T('Invalid URL')
-            redirect(URL('default','index'))
 
-    g = None
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
-        g = request.args(1) or None
-
->>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
-    if (g == 0):
-        auth.add_membership('poster')
-    elif (g == 1):
+    if (g == '0'):
         auth.add_membership('viewer')
 
-    form = SQLFORM(db.profile,
-                   record=r,
-                   fields =['name'],
-                   submit_button = 'Submit',
-                   deletable= False,
-                   showid=False)
+    elif (g == '1'):
+        auth.add_membership('poster')
+
+
+    entries = db(db.profile.owner_id == get_user_id()).select()
+    if (len(entries) > 0):
+        r = entries.first().id
+        form = SQLFORM(db.profile,
+                       record=r,
+                       fields =['name'],
+                       submit_button = 'Submit',
+                       deletable= False,
+                       showid=False)
+    else:
+        form = SQLFORM(db.profile,
+                       fields =['name'],
+                       submit_button = 'Submit',
+                       deletable= False,
+                       showid=False)
 
     if (form.process().accepted):
         session.flash = T('Success!')
-        redirect(URL('default','wall',args=[get_user_id()]))
+        redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form)
-<<<<<<< HEAD
-    
-@auth.requires_login()
-def wall():       
-    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-=======
 
-#@auth.requires_login()
+@auth.requires_login()
 def wall():
->>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     events = """
 	$(document).ready(function() {
 
@@ -130,23 +101,24 @@ def wall():
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
 
 	});"""
-<<<<<<< HEAD
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-   
+
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
-=======
 
-    return dict(events=SCRIPT(events, _type='text/javascript'))
->>>>>>> 6561e745b94a34d9fb3e7df4cdc98823d70fcb67
-
-@auth.requires_membership('poster')
 def edit_event():
     return dict()
 
-@auth.requires_membership('poster')
 def new_event():
-    form = SQLFORM(db.events)
+    form = SQLFORM(db.events,
+                    fields=['title',
+                            'start_time',
+                            'end_time',
+                            'all_day',
+                            'tags',
+                            'image'])
+
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
         redirect(URL('default','wall',args=[get_user_id()]))
@@ -154,18 +126,88 @@ def new_event():
         session.flash = T('Check for errors in form.')
     return dict(form=form)
 
-def search():
-    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-    results = get_tag_events(request.args[0])
+def list_format(results):
+    # If no results return early
+    if len(results) == 0:
+        #return dict(search="No Results", results="")
+        return H3("No Results")
+    # Test for another search
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
-    results_html = ""
+
+    # Format the Text into HTML
+    results_html = []
     for result in results:
-        results_html += result.title + '\n'
-        results_html += str(result.start_time) + '\n'
-        results_html += str(result.end_time) + '\n'
-        results_html += '\n'
-    return dict(search=search, results=P(results_html))
+        title = A(result.title, _href=URL('default', 'view_event', args=[result.title]))
+        inner_html = H2(title) + H4(str(result.start_time) + ', ' + str(result.end_time))
+        for tag in result.tags:
+            inner_html = inner_html + H4(str(tag)) + " "
+
+        div = DIV(inner_html, _id="event-listing")
+        results_html.append(div)
+        logger.info(div)
+    return results_html
+
+def cal_format(results):
+    results_html = """
+	$(document).ready(function() {
+
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: false,
+			events: ["""
+
+    for result in results:
+        results_html += "{"
+        results_html += "title:'" + result.title + "',"
+        results_html += "start:'" + str(result.start_time) + "',"
+        results_html += "end:'" + str(result.end_time) + "'"
+        results_html += "},"
+
+    results_html += "]});});"
+    return results_html
+
+def search():
+    search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
+    if request.post_vars.search != None:
+        redirect(URL('default','search', args=[request.post_vars.search]))
+    # Query the database
+    results = get_tag_events(request.args[0])
+    logger.info(results)
+    list_results_html = list_format(results)
+    cal_results_html = cal_format(results)
+    return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+
+<<<<<<< HEAD
+def search_date():
+    tag = request.vars.tags
+    tags = []
+    tags.append(tag)
+    import time
+    import datetime
+    start = time.mktime(datetime.datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple())
+    end = time.mktime(datetime.datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple())
+    print start, end
+    print "a"
+    conflicts = get_timing_conflicts(tags, int(start), int(end));
+    print "b"
+    cal_results_html = cal_format(conflicts)
+    print "Results", cal_results_html
+    print SCRIPT(cal_results_html, _type='text/javascript')
+    return dict()
+=======
+def view_event():
+    if request.args == []:
+        return dict()
+
+    image = db(db.events.title == request.args[0]).select().first()
+    return dict(image=image)
+>>>>>>> 2a3592f3ab892b4ccea3d177b70900532648ff5b
 
 def user():
     """
@@ -183,6 +225,7 @@ def user():
     to decorate functions that need access control
     """
     return dict(form=auth())
+
 
 @cache.action()
 def download():
