@@ -1,0 +1,23 @@
+{{extend 'layout.html'}}
+
+{{=cal_results}}
+
+<script>
+$(document).ready(function() {
+    $("#list_results").hide();
+    //$("#cal_results").hide();
+    $("#cal_button").click(function(){
+        $("#list_results").hide();
+        $("#cal_results").show();
+    });
+    $("#list_button").click(function(){
+        $("#cal_results").hide();
+        $("#list_results").show();
+    });
+});
+</script>
+{{=search}}
+<a id="cal_button" href="#" >Calendar</a>&nbsp|&nbsp<a id="list_button" href="#">List</a>
+<div id="list_results">{{=P(list_results)}}</div>
+<div id="cal_results"><div id="calendar"></div></div>
+
