@@ -167,7 +167,7 @@ def new_event():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
         session.flash = T('Success!')
-        redirect(URL('default','edit_event',args=[form.vars.id]))
+        redirect(URL('default','wall',args=[form.vars.id]))
     else:
         session.flash = T('Check for errors in form.')
     return dict(form=form, gcal=gcal)
@@ -226,7 +226,7 @@ def search():
     list_results_html = None
     cal_results_html = None
     session.prev_search = r_temp
-    print r_temp
+    print get_related_tags(r_temp)
 
 # Search form
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
