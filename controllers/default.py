@@ -315,6 +315,7 @@ def view_event():
     inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
     div = DIV(inner_html, _id="event-view")
     results_html.append(div)
+    results_html.append(INPUT(_type="button", _action=URL('add_event', args=[result.id])))
     address = ""
     city = ""
     zipcode = ""
@@ -325,8 +326,14 @@ def view_event():
     if result.zip != None:
         zipcode = result.zip
     location = address + " " + city + " " + zipcode;
-    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location + "\"";
+    location_url = "https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location;
     return dict(view_event=results_html, location_url=location_url)
+
+"""
+def add_event():
+    db(db.profile.id == get_user_id()).select(
+    """
+
 
 #
 # Built in code w/ web2py

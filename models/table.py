@@ -42,6 +42,7 @@ db.events.owner_id.readable = False
 db.define_table('profile',
                  Field ('name', 'string', default=get_user_name()),
                  Field ('owner_id',default=get_user_id()),
-                 Field ('tags','list:string')
+                 Field ('tags','list:string'),
+                 Field ('events','list:integer')
                  )
 db.profile.owner_id.readable = False
