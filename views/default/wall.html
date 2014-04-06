@@ -9,13 +9,13 @@
 {{=HTML(events)}}
 <div align="left">
 <table border="0"> <tr>
-	<td> <form action="{{URL('default','index')}}">
+	<td> <form action="{{=URL('default','index')}}">
 		<input type="submit" value="All">
 	</form> </td>
-	<td> <form action="{{URL('default','wall')}}">
+	<td> <form action="{{=URL('default','wall')}}">
 		<input type="submit" value="My Calendar">
 	</form> </td>
-    <td> <form action="{{URL('default','wall')}}">
+    <td> <form action="{{=URL('default','new_event')}}">
 		<input type="submit" value="Add Event">
 	</form> </td>
 	</tr>
