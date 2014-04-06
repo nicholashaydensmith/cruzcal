@@ -77,11 +77,12 @@
 	<a class="login_button" id="login">Login</a>
   <div class="container">
     <!-- Masthead ================================================== -->
-    <header class="mastheader row" id="header" align="center">
-{{=FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit'))}}
+    <header class="mastheader row" id="header" align="left">
+	
       {{if response.title:}}
         <div class="span12">
             <div class="page-header">
+			{{=FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit'))}}
             </div>
         </div>
 	{{pass}}
