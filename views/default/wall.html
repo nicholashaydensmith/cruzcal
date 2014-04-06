@@ -7,13 +7,25 @@
 -->
 
 {{=HTML(events)}}
+
+<script>
+$(document).ready(function() {
+    $("#all_button").click(function(){
+        {{=get_all_cal}}
+    });
+    $("#my_button").click(function(){
+        {{=get_your_cal}}
+    });
+});
+
+</script>
 <div align="left">
 <table border="0"> <tr>
-	<td> <form action="{{URL('default','index')}}">
-		<input type="submit" value="All">
+	<td> <form>
+		<input id="all_button" type="submit" value="All">
 	</form> </td>
-	<td> <form action="{{URL('default','wall')}}">
-		<input type="submit" value="My Calendar">
+	<td> <form>
+		<input id="my_button" type="submit" value="My Calendar">
 	</form> </td>
 	</tr>
 	</table>

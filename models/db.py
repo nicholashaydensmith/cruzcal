@@ -255,7 +255,7 @@ def get_relation_strength(name, tag_assoc):
     elif (name == tag_assoc.from_):
         other = db(db.tags.name == tag_assoc.to_).select().first()
     else: return 0
-    return tag_assoc.num / other.num
+    return 100 * tag_assoc.num / other.num
 
 class TagData:
     def __init__(self, name, rel_str):
@@ -283,6 +283,8 @@ def get_related_tags(name):
 
 # 'tag' can be a single tag or an array of tags
 def get_tag_events(tag):
+    if tag == None:
+        return []
     entries = db((db.events.tags.contains(tag, all=False))).select()
     result = []
     for e in entries:
@@ -298,16 +300,20 @@ def get_tag_conflicts(tag, rel_str, start, end):
     entries = db(db.events.tags.contains(tag)).select()
     result = []
     for e in entries:
-        e_start = datetime.strptime(e.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
-        e_end = datetime.strptime(e.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        print "0", e.start_time, "0"
+        e_start = datetime.strptime(str(e.start_time), "%Y-%m-%d %H:%M:%S").timetuple()
+        print "1", e_start
+        e_end = datetime.strptime(str(e.end_time), "%Y-%m-%d %H:%M:%S").timetuple()
         if ((e_start > start and e_start < end) or (e_end > start and e_end < end)):
             result.append(ConflictData(e, rel_str))
     return result
 
 def get_timing_conflicts(tags, start, end):
     rel_tag_data = []
+    print "0"
     for tag in tags:
         rel_tag_data = rel_tag_data + get_related_tags(tag)
+    print "1"
     i = 0
     for tag_data in rel_tag_data:
         d = False
