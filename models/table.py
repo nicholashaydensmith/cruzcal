@@ -14,14 +14,14 @@ db.tags.name.unique = True
 
 # tag association
 db.define_table('tag_assoc',
-                Field('to_','reference tags'),
-                Field('from_','reference tags'),
+                Field('to_','string'),
+                Field('from_','string'),
                 Field('num','integer')
                 )
 
 # event
 db.define_table('events',
-                 Field('title','string'),
+                 Field ('title','string'),
                  Field ('is_gfeed', 'boolean'),
                  Field ('google_feed', 'string'),
                  Field ('owner_id',default=get_user_id()),

@@ -10,6 +10,8 @@
 # request.requires_https()
 
 import string
+import time
+from datetime import datetime
 
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
@@ -262,8 +264,10 @@ class TagData:
         self.rel_str = rel_str
 
 def get_related_tags(name):
+    print "0"
     entries = db((db.tag_assoc.to_ == name) | (db.tag_assoc.from_ == name)).select()
     result = []
+    print "1"
     for e in entries:
         if (name == tag_assoc.to_):
             other = tag_assoc.from_
@@ -271,6 +275,7 @@ def get_related_tags(name):
             other = tag_assoc.to_
         imin = 0
         imax = len(result)
+        print "2"
         while imin < imax:
             imid = round((imin + imax) / 2)
             if (strength < result[imid].rel_str):
@@ -282,7 +287,7 @@ def get_related_tags(name):
 
 # 'tag' can be a single tag or an array of tags
 def get_tag_events(tag):
-    entries = db(db.events.tags.contains(tag, all=False)).select()
+    entries = db((db.events.tags.contains(tag, all=False))).select()
     result = []
     for e in entries:
         result.append(e)
@@ -293,21 +298,24 @@ class ConflictData:
         self.event = event
         self.rel_str = rel_str
 
-# 'start' and 'end' are UNIX timestamps
 def get_tag_conflicts(tag, rel_str, start, end):
-    search1 = ((db.events.start > start) & (db.events.start < end))
-    search2 = ((start > db.events.start) & (start < db.events.end))
-    entries = db(db.events.tags.contains(tag) & (search1 | search2)).select()
+    entries = db(db.events.tags.contains(tag)).select()
     result = []
     for e in entries:
-        result.append(ConflictData(e, rel_str))
+        print "t1", e.start_time
+        e_start = datetime.strptime(e.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        print "t2", e_start
+        e_end = datetime.strptime(e.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        if ((e_start > start and e_start < end) or (e_end > start and e_end < end)):
+            result.append(ConflictData(e, rel_str))
     return result
 
-# 'start' and 'end' are UNIX timestamps
 def get_timing_conflicts(tags, start, end):
     rel_tag_data = []
+    print "0"
     for tag in tags:
         rel_tag_data = rel_tag_data + get_related_tags(tag)
+    print "1"
     i = 0
     for tag_data in rel_tag_data:
         d = False
@@ -317,11 +325,14 @@ def get_timing_conflicts(tags, start, end):
                 break
         if (d or tag_data.rel_str < 40): rel_tag_data.pop(i)
         i = i + 1
+    print "3"
     conflicts = []
     for tag in tags:
         conflicts = conflicts + get_tag_conflicts(tag, 100, start, end)
+    print "4"
     for tag_data in rel_tag_data:
         conflicts = conflicts + get_tag_conflicts(tag_data.name, tag_data.rel_str, start, end)
+    print "5"
     return conflicts
 
 def parse_input_to_tags(text):

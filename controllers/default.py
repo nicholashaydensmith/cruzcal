@@ -260,26 +260,22 @@ def search():
 					cal_results=None)
 
 def search_date():
-    tag = request.vars.tags
-    tags = []
-    tags.append(tag)
-    import time
-    import datetime
-    start = time.mktime(datetime.datetime.strptime(request.vars.start_time, "%Y-%m-%d").timetuple())
-    end = time.mktime(datetime.datetime.strptime(request.vars.end_time, "%Y-%m-%d").timetuple())
+    if request.vars == []:
+        return dict()
+    tags = parse_input_to_tags(request.vars.tags)
+    start = datetime.strptime(request.vars.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+    end = datetime.strptime(request.vars.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
     print start, end
-    print "a"
-    conflicts = get_timing_conflicts(tags, int(start), int(end));
-    print "b"
+    conflicts = get_timing_conflicts(tags, start, end);
+    print "Conflicts", conflicts
     cal_results_html = cal_format(conflicts)
-    print "Results", cal_results_html
     print SCRIPT(cal_results_html, _type='text/javascript')
     return dict()
 
 def view_event():
     if request.args == []:
         return dict()
-    
+
     results = db(db.events.id == request.args[0]).select()
     print results
     results_html = H1("")
