@@ -17,18 +17,12 @@ def index():
     if (auth.user != None):
 		redirect(URL('default','wall'))
 
-    events = """
-	$(document).ready(function() {
-		$('#calendar').fullCalendar({
-                        height: 500,
-			editable: true,
-			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
+    cal_results_html = wrap_cal(get_all_cal())
 
-	});"""
     if request.post_vars.search != None:
         redirect(URL('default','search', args=[request.post_vars.search]))
 
-    return dict(search=search, events=SCRIPT(events, _type='text/javascript'),m=message)
+    return dict(search=search, events=SCRIPT(cal_results_html, _type='text/javascript'),m=message)
 
 def select_user():
     if (auth.has_membership('poster') or auth.has_membership('viewer')):
@@ -192,7 +186,7 @@ def list_format(results):
             if (tag != result.tags[len(result.tags) - 1]):
                 tag_str = CAT(tag_str, ', ')
         if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
-            inner_html = CAT(H2(title), H4(result.start_time.strftime("%b %d, %Y %I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")), CAT(H4('Tags: ', tag_str)))
+            inner_html = CAT(H2(title), H4(result.start_time.strftime("%b %d, %Y")), H4(result.start_time.strftime(" %I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")), CAT(H4('Tags: ', tag_str)))
         else:
             inner_html = CAT(H2(title), H4('From: ', result.start_time.strftime("%b %d, %Y %I:%M%p")), H4('To: ', result.end_time.strftime("%b %d, %Y %I:%M%p")), CAT(H4('Tags: ', tag_str)))
 
