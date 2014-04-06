@@ -300,10 +300,8 @@ def get_tag_conflicts(tag, rel_str, start, end):
     entries = db(db.events.tags.contains(tag)).select()
     result = []
     for e in entries:
-        print "0", e.start_time, "0"
-        e_start = datetime.strptime(str(e.start_time), "%Y-%m-%d %H:%M:%S").timetuple()
-        print "1", e_start
-        e_end = datetime.strptime(str(e.end_time), "%Y-%m-%d %H:%M:%S").timetuple()
+        e_start = datetime.strptime(e.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
+        e_end = datetime.strptime(e.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
         if ((e_start > start and e_start < end) or (e_end > start and e_end < end)):
             result.append(ConflictData(e, rel_str))
     return result
