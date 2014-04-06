@@ -48,8 +48,10 @@ crud, service, plugins = Crud(db), Service(), PluginManager()
 
 ## create all tables needed by auth if not custom tables
 auth.define_tables(username=False, signature=False)
-auth.add_group ('viewer','General user can\'t create events')
-auth.add_group ('poster','Can post new events')
+if (db(db.auth_group.role == 'viewer').isempty()):
+    auth.add_group ('viewer')
+if (db(db.auth_group.role == 'poster').isempty()):
+    auth.add_group ('poster')
 
 ## configure email
 mail = auth.settings.mailer

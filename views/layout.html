@@ -75,7 +75,7 @@
 
 	<a href="{{=URL('default', 'index')}}"><img src="{{=URL('static','images/cruzcal.png')}}" style="padding:30px;" border="0"></a>
 	{{if(auth.user == None):}}
-		{{=A('Login',_class='login_button', _id='login', _href=URL('default', 'user', args=['login'],vars = dict (_next=URL ('default', 'wall'))))}}
+		{{=A('Login',_class='login_button', _id='login', _href=URL('default', 'user', args=['login'], vars = dict (_next=URL ('default', 'wall'))))}}
 		{{=A('Sign Up',_class='login_button', _id='signup', _href=URL('default','user',args=['login'],vars = dict (_next=URL ('default', 'select_user'))))}}
 	{{else:}}
 		{{=A('Logout',_class='login_button', _id='logout', _href=URL('default', 'user', args=['logout'], vars = dict (_next=URL ('default', 'index'))))}}
