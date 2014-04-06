@@ -296,20 +296,18 @@ def get_timing_conflicts(tags, start, end):
     rel_tag_data = []
     for tag in tags:
         rel_tag_data = rel_tag_data + get_related_tags(tag)
-
     i = 0
     for tag_data in rel_tag_data:
-        delete = False
+        d = False
         for tag in tags:
-            if (tag_data.name == tag): delete = True, break
-        if (delete or tag_data.rel_str < 40): rel_tag_data.pop(i)
+            if (tag_data.name == tag):
+                d = True
+                break
+        if (d or tag_data.rel_str < 40): rel_tag_data.pop(i)
         i = i + 1
-
     conflicts = []
     for tag in tags:
         conflicts = conflicts + get_tag_conflicts(tag, 100, start, end)
-
     for tag_data in rel_tag_data:
         conflicts = conflicts + get_tag_conflicts(tag_data.name, tag_data.rel_str, start, end)
-
     return conflicts
