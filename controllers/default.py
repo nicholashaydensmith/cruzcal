@@ -152,6 +152,19 @@ def edit_event():
 	redirect(URL('default','wall'))
 	return dict()
 
+def update_tag(tags):
+	if type(tags) != list:
+		tags = [tags]
+	for t in tags:
+		rows = db(db.tags.name == t).select()
+		if len(rows) < 1 :
+			db.tags.insert(name=t, num=1)
+		else:
+			for r in rows:
+				r.num = r.num + 1
+				r.update_record()
+	return None
+
 @auth.requires_login()
 def new_event():
     form = SQLFORM(db.events,
@@ -167,8 +180,9 @@ def new_event():
 
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
     if (form.process().accepted):
-        session.flash = T('Success!')
-        redirect(URL('default','wall',args=[form.vars.id]))
+		update_tag( form.vars.tags )
+		session.flash = T('Success!')
+		redirect(URL('default','wall'))
     else:
         session.flash = T('Check for errors in form.')
 
