@@ -263,22 +263,28 @@ class TagData:
         self.rel_str = rel_str
 
 def get_related_tags(name):
+    if name == None:
+        return []
     entries = db((db.tag_assoc.to_ == name) | (db.tag_assoc.from_ == name)).select()
     result = []
     for e in entries:
-        if (name == tag_assoc.to_):
-            other = tag_assoc.from_
-        elif (name == tag_assoc.from_):
-            other = tag_assoc.to_
-        imin = 0
-        imax = len(result)
-        while imin < imax:
-            imid = round((imin + imax) / 2)
-            if (strength < result[imid].rel_str):
-                imin = imid + 1
-            else:
-                imax = imid
-        result.insert(imin, TagData(name, strength))
+        print "entry: ", e
+        if (name == e.to_):
+            other = e.from_
+        elif (name == e.from_):
+            other = e.to_
+        result.append(TagData(other, e.num))
+        #imin = 0
+        #imax = len(result)
+        #while imin < imax:
+        #    imid = round((imin + imax) / 2)
+        #    if (strength > result[imid].rel_str):
+        #        imin = imid + 1
+        #    else:
+        #        imax = imid
+        #result.insert(imin, TagData(name, strength))
+    #result.reverse()
+    print "result: ", result
     return result
 
 # 'tag' can be a single tag or an array of tags
@@ -299,27 +305,40 @@ class ConflictData:
 def get_tag_conflicts(tag, rel_str, start, end):
     entries = db(db.events.tags.contains(tag)).select()
     result = []
+    start = datetime.strptime(str(start), "%Y-%m-%d %H:%M:%S").timetuple()
+    end = datetime.strptime(str(end), "%Y-%m-%d %H:%M:%S").timetuple()
     for e in entries:
-        e_start = datetime.strptime(e.start_time, "%Y-%m-%d %H:%M:%S").timetuple()
-        e_end = datetime.strptime(e.end_time, "%Y-%m-%d %H:%M:%S").timetuple()
-        if ((e_start > start and e_start < end) or (e_end > start and e_end < end)):
-            result.append(ConflictData(e, rel_str))
+        e_start = datetime.strptime(str(e.start_time), "%Y-%m-%d %H:%M:%S").timetuple()
+        e_end = datetime.strptime(str(e.end_time), "%Y-%m-%d %H:%M:%S").timetuple()
+        ex1 = bool(e_start > start)
+        ex2 = bool(end > e_start)
+        ex3 = bool(e_end > start)
+        ex4 = bool(end > e_end)
+        ex5 = ex1 and ex2
+        ex6 = ex3 and ex4
+        ex7 = ex5 or ex6
+        if ex7:
+            print "conflict"
+            result.append(e)
+            print "done"
     return result
 
 def get_timing_conflicts(tags, start, end):
     rel_tag_data = []
-    print "0"
     for tag in tags:
         rel_tag_data = rel_tag_data + get_related_tags(tag)
-    print "1"
     i = 0
     for tag_data in rel_tag_data:
+        if tag_data == None:
+            continue
+
         d = False
         for tag in tags:
-            if (tag_data.name == tag):
+            if (str(tag_data.name) == str(tag)):
                 d = True
-                break
-        if (d or tag_data.rel_str < 40): rel_tag_data.pop(i)
+        if (d or tag_data.rel_str < 40):
+            print str(tag_data.rel_str)
+            rel_tag_data.pop(i)
         i = i + 1
     conflicts = []
     for tag in tags:

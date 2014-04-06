@@ -104,8 +104,10 @@ def wall():
     search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
 
     user_id = get_user_id()
-    user_tags = db(db.profile.owner_id == user_id).select().first().tags
-    results = get_tag_events(user_tags)
+    user = db(db.profile.owner_id == user_id).select().first()
+    if user == None:
+        return dict()
+    results = get_tag_events(user.tags)
     cal_results_html = wrap_cal(cal_format(results))
 
     if request.post_vars.search != None:
@@ -149,15 +151,35 @@ def edit_event():
 def update_tag(tags):
 	if type(tags) != list:
 		tags = [tags]
+        i = 0
 	for t in tags:
 		rows = db(db.tags.name == t).select()
 		if len(rows) < 1 :
 			db.tags.insert(name=t, num=1)
 		else:
 			for r in rows:
-				r.num = r.num + 1
-				r.update_record()
+			    r.num = r.num + 1
+			    r.update_record()
+
+                # Don't update more than once
+                for j in range(i, len(tags)):
+                    update_relation(t, tags[j])
+                i = i + 1
 	return None
+
+def update_relation(t1, t2):
+    if t1 == t2:
+        return None
+    q1 = (db.tag_assoc.to_ == t1) & (db.tag_assoc.from_ == t2)
+    q2 = (db.tag_assoc.to_ == t2) & (db.tag_assoc.from_ == t1)
+    rel = db(q1 | q1).select().first()
+    if rel == None:
+        db.tag_assoc.insert(to_ = t1, from_ = t2, num = 1)
+    else:
+        rel.num = rel.num + 1
+        rel.update_record()
+
+    return None
 
 @auth.requires_login()
 def new_event():
@@ -283,7 +305,7 @@ def search_date():
     if request.vars == []:
         return dict()
     tags = request.vars.tags
-    conflicts = tmp_get_timing_conflicts(request.vars.start_time, request.vars.end_time)
+    conflicts = get_timing_conflicts(tags, request.vars.start_time, request.vars.end_time)
     cal_results_html = cal_format(conflicts)
     return SCRIPT(cal_results_html, _type='text/javascript')
 
