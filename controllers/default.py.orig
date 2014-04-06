@@ -10,6 +10,12 @@
 #########################################################################
 
 def index():
+<<<<<<< HEAD
+    if (auth.user == None):
+        response.flash = T("Welcome to CruzCal!")
+    elif (db(db.profile.owner_id == get_user_id()).count > 0):
+        redirect(URL('default','start',args=[get_user_id()]))
+=======
     """
     example action using the internationalization operator T and flash
     rendered by views/default/index.html or views/generic.html
@@ -22,21 +28,25 @@ def index():
     user_found = True
     events = """
 	$(document).ready(function() {
-
+	
 		var date = new Date();
 		var d = date.getDate();
 		var m = date.getMonth();
 		var y = date.getFullYear();
-
+		
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
-
+		
 	});
     """
     if user_found:
         return dict(events=SCRIPT(events, _type='text/javascript'))
+>>>>>>> d9ba38f813c440d710157a6010492486a62ba755
+    else:
+        redirect(URL('default','setup_profile',args=[get_user_id()]))
+    return dict()
 
 def user():
     """
