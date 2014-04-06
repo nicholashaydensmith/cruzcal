@@ -163,6 +163,9 @@ def new_event():
                             'all_day',
                             'tags',
                             'image',
+                            'address',
+                            'city',
+                            'zip',
                             'details'])
     gcal = SQLFORM(db.events, fields = ['google_feed', 'tags'])
     gcal.vars.is_gfeed = True
@@ -288,8 +291,9 @@ def view_event():
     inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
     div = DIV(inner_html, _id="event-view")
     results_html.append(div)
-
-    return dict(view_event=results_html)
+    location = result.address + " " + result.city + " " + result.zip;
+    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + result.+ "\"";
+    return dict(view_event=results_html, location_url=location_url)
 
 #
 # Built in code w/ web2py
