@@ -290,13 +290,13 @@ def search():
         redirect(URL('default','search', args=[request.post_vars.search]))
 
     if (r_temp == None):
-	redirect(URL('default','wall'))
+        redirect(URL('default','wall'))
     else:
 	# Query the database
-	results = get_tag_events(r_temp)
-	list_results_html = list_format(results)
-	cal_results_html = wrap_cal(cal_format(results))
-	return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
+        results = get_tag_events(r_temp)
+        list_results_html = list_format(results)
+        cal_results_html = wrap_cal(cal_format(results))
+        return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
 
     return dict(search=None, list_results=None,
                     cal_results=None)
@@ -337,6 +337,7 @@ def view_event():
     inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
     div = DIV(inner_html, _id="event-view")
     results_html.append(div)
+    results_html.append(INPUT(_type="button", _action=URL('add_event', args=[result.id])))
     address = ""
     city = ""
     zipcode = ""
@@ -347,8 +348,14 @@ def view_event():
     if result.zip != None:
         zipcode = result.zip
     location = address + " " + city + " " + zipcode;
-    location_url = "\"https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location + "\"";
+    location_url = "https://www.google.com/maps/embed/v1/place?key=AIzaSyD8PPe9mRzSIAcJnRktAeiFQ27NTuv4dFE&q=" + location;
     return dict(view_event=results_html, location_url=location_url)
+
+"""
+def add_event():
+    db(db.profile.id == get_user_id()).select(
+    """
+
 
 #
 # Built in code w/ web2py
