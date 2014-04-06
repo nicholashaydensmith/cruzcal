@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+<h1>
+    Are you a user who would like to subscribe to certain types of events on CruzCal?
+</h1>
+{{=A("View Events",_href=URL('default','edit_profile',args = ['0']))}}
+<h1>
+    Are you a community organizer, company, or event planner who would like to create events on CruzCal?
+</h1>
+{{=A("Create Events",_href=URL('default','edit_profile',args = ['1']))}}

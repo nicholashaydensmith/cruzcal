@@ -20,7 +20,7 @@
 	font-style:normal;
 	height:33px;
 	line-height:33px;
-	width:47px;
+	width:auto;
 	text-decoration:none;
 	text-align:right;
 }.login_button:active {
@@ -42,7 +42,6 @@ right:20px;
 
 #signup{
 position: absolute;
-width:62px;
 top: 48px;
 right: 20px;
 }
