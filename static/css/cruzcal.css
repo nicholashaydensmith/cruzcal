@@ -1,4 +1,37 @@
 
-body {
-    background-color: 'black';
+#banner{
+	background:black;
+	position:absolute;
+	left: 0;
+	right: 0;
+	height:160px;
+	background-size:100%;	
+}
+
+.login_button {
+	background-color:transparent;
+	display:inline-block;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:16px;
+	font-weight:bold;
+	font-style:normal;
+	height:33px;
+	line-height:33px;
+	width:47px;
+	text-decoration:none;
+	text-align:center;
+}.login_button:active {
+	position:relative;
+	top:1px;
+} a.login_button:hover {
+	position:relative;
+	color:#CCCCCC;
+	font-style:normal;
+	text-decoration:none;
+}
+#login{
+position:absolute;
+top: 27px;
+right:20px;
 }
