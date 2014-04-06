@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
 
 #########################################################################
 ## This is a sample controller
@@ -20,10 +19,24 @@ def index():
         message = T(welcome + name_or_blank)
     else:
         redirect(URL('default','wall'))
-        
-    return dict(m = message)   
+    
+    events = """
+	$(document).ready(function() {
 
-<<<<<<< HEAD
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+
+		$('#calendar').fullCalendar({
+            height: 500,
+			editable: true,
+			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
+
+	});"""
+   
+    return dict(events=SCRIPT(events, _type='text/javascript'),m=message)
+
 @auth.requires_login()
 def edit_profile():
     # URL validation
@@ -66,48 +79,6 @@ def wall():
 @auth.requires_membership('poster')
 def edit_event():
     return dict()
-=======
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    #Grab username
-    user = "Nick"
-    user_found = True
-    events = """
-	$(document).ready(function() {
-
-		var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
-
-		$('#calendar').fullCalendar({
-            height: 500,
-			editable: true,
-			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
-
-	});
-    """
-    if user_found:
-        return dict(events=SCRIPT(events, _type='text/javascript'))
->>>>>>> 7190cb7410d4be01bf1ba59d2641011133e93e66
-
-def user():
-    """
-    exposes:
-    http://..../[app]/default/user/login
-    http://..../[app]/default/user/logout
-    http://..../[app]/default/user/register
-    http://..../[app]/default/user/profile
-    http://..../[app]/default/user/retrieve_password
-    http://..../[app]/default/user/change_password
-    http://..../[app]/default/user/manage_users (requires membership in
-    use @auth.requires_login()
-        @auth.requires_membership('group name')
-        @auth.requires_permission('read','table name',record_id)
-    to decorate functions that need access control
-    """
-    return dict(form=auth())
 
 @auth.requires_login
 def setup_profile():
@@ -137,6 +108,23 @@ def setup_profile():
         session.flash = T('Sucess!')
 
     return dict(form=form)
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    http://..../[app]/default/user/manage_users (requires membership in
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    """
+    return dict(form=auth())
 
 @cache.action()
 def download():
