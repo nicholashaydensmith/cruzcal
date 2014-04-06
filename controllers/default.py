@@ -17,7 +17,6 @@ def index():
     if (auth.user != None):
 		redirect(URL('default','wall'))
 
-
     events = """
 	$(document).ready(function() {
 
@@ -105,7 +104,6 @@ def edit_tags() :
 	else:
 		session.flash = T('Check for errors in form.')
 	
-	logger.info("%r" % record.first())
 	if (not tags):
 		tags = "No tags yet! Add some above."
 	elif(record.first() != None):
@@ -135,6 +133,7 @@ def wall():
 
     return dict(search=search, events=SCRIPT(events, _type='text/javascript'))
 
+@auth.requires_login()
 def edit_event():
 #	e = request.args(0) or None
 #	if (e == None):
@@ -167,8 +166,8 @@ def edit_event():
 	redirect(URL('default','wall'))
 	return dict()
 
+@auth.requires_login()
 def new_event():
-
     form = SQLFORM(db.events,
                     fields=['title',
                             'start_time',
