@@ -266,14 +266,13 @@ def view_event():
         results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
 
-        #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
-        #end_date = datetime.strptime(result.end_time)
-
-        #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
-        #div_center = DIV(time_str, _id="event-list")
-        #results_html.append(div_center)
-        #results_html += (H3(result.start_time))
-        #results_html += (H3(result.end_time))
+        if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
+            time_str = H3(result.start_time.strftime("%b %d %Y"))
+        else:
+            time_str = H3(result.start_time.strftime("%b %d %Y") + " - " + result.end_time.strftime("%b %d %Y"))
+        time_str = CAT(time_str, H4(result.start_time.strftime("%I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")))
+        div_center = DIV(time_str, _id="event-list")
+        results_html.append(div_center)
 
         tag_str = CAT('', '')
         for tag in result.tags:
