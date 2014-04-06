@@ -76,16 +76,16 @@ def edit_profile():
 
 @auth.requires_login()
 def edit_tags() :
-	
+
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'List a current tag to delete it.'
-	
+
 	list = []
 	tags = []
 	record = db(db.profile.owner_id == get_user_id()).select()
 	if (record != None and record.first() != None and record.first().tags != None):
 		tags = record.first().tags
-			
+
 	if (form2.process().accepted):
 		list = form2.vars.tags.split(',') or None
 		for tag in list:
@@ -96,12 +96,12 @@ def edit_tags() :
 				tags.append(tag)
 	else:
 		session.flash = T('Check for errors in form.')
-	
+
 	if (not tags):
 		tags = "No tags yet! Add some above."
 	elif(record.first() != None):
 		record.first().update_record(tags=tags)
-		
+
 	return dict(form2 = form2,tags=tags)
 
 @auth.requires_login()
@@ -126,7 +126,7 @@ def edit_event():
 		redirect(URL('default','wall'))
 	form = SQLFORM(db.events, record = e, fields=['title','start_time','end_time','all_day','image','details'],
 				   submit_button = 'Update Event', showid = False)
-	
+
 	form2 = SQLFORM.factory (Field('tags'),submit_button = 'Update Tags')
 	form2.vars.tags = 'Enter Comma Separated List'
 	list = []
@@ -134,7 +134,7 @@ def edit_event():
 	record = db.events[e]
 	if (record != None and record.tags != None):
 		tags = record.tags
-			
+
 	if (form2.process().accepted):
 		list = form2.vars.tags.split(',') or None
 		for tag in list:
@@ -143,12 +143,12 @@ def edit_event():
 				tags.append(tag.lower())
 	else:
 		session.flash = T('Check for errors in form.')
-		
+
 	if (not tags):
 		tags = "No tags yet! Add some above."
 	else:
 		record.update_record(tags=tags)
-		
+
 	return dict(form = form, form2 = form2,tags=tags)
 
 def new_event():
@@ -201,7 +201,7 @@ def cal_format(results):
     results_html = """
 	$(document).ready(function() {
 		$('#calendar').fullCalendar({
-            height: 500,
+                        height: 500,
 			editable: false,
 			events: ["""
 
@@ -215,7 +215,7 @@ def cal_format(results):
             results_html += "end:'" + str(result.end_time) + "'"
             results_html += "},"
 
-    results_html += "]})});"
+    results_html += "]}); });"
     return results_html
 
 def search():
@@ -224,10 +224,10 @@ def search():
 	results = None
 	list_results_html = None
 	cal_results_html = None
-	
+
 	# Search form
 	search = FORM(INPUT(_name='search', _value='Search Events', _onblur="if(this.value == ''){this.value = 'Search Events'}", _onFocus="if(this.value=='Search Events'){this.value=''}", requires=IS_NOT_EMPTY()), INPUT(_type='submit', _action=URL('search')))
-	
+
 	if (r_temp == None):
 		redirect(URL('default','wall'))
 	else:
@@ -236,11 +236,11 @@ def search():
 		list_results_html = list_format(results)
 		cal_results_html = cal_format(results)
 		return dict(search=search, list_results=P(list_results_html), cal_results=SCRIPT(cal_results_html, _type='text/javascript'))
-	
+
 	# Redirect with search form value
 	if (request.post_vars.search != None):
 		redirect(URL('default','search', args=[request.post_vars.search]))
-	
+
 	return dict(search=None, list_results=None,
 					cal_results=None)
 
@@ -262,16 +262,16 @@ def view_event():
     for result in results:
         results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
-        
+
         #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
         #end_date = datetime.strptime(result.end_time)
-        
+
         #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
         #div_center = DIV(time_str, _id="event-list")
         #results_html.append(div_center)
         #results_html += (H3(result.start_time))
         #results_html += (H3(result.end_time))
-        
+
         tag_str = CAT('', '')
         for tag in result.tags:
             tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
