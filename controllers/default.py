@@ -199,6 +199,7 @@ def list_format(results):
 
 def cal_format(results):
     results_html = """
+	$(document).ready(function() {
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: false,
@@ -214,7 +215,7 @@ def cal_format(results):
             results_html += "end:'" + str(result.end_time) + "'"
             results_html += "},"
 
-    results_html += "]});"
+    results_html += "]})});"
     return results_html
 
 def search():
