@@ -6,22 +6,18 @@ from datetime import datetime
 
 # tags
 db.define_table ('tags',
-                 Field ('name','string'),
-                 Field ('num', 'integer')
+                 Field ('name','string')
                  )
 
 db.tags.name.unique = True
 
-# tag association
-db.define_table('tag_assoc',
-                Field('to_','reference tags'),
-                Field('from_','reference tags'),
-                Field('num','integer')
-                )
-
 # event
-db.define_table('events',
+db.define_table ('events',
+<<<<<<< HEAD
+                 Field ('name','string'),
+=======
                  Field('name','string'),
+>>>>>>> 1d507533b6779a36c7ff39ae0c0bf267f6280bb9
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string'),
                  Field ('details','json'),
@@ -33,8 +29,8 @@ db.events.tags.widget = SQLFORM.widgets.autocomplete(
      request, db.tags.name, limitby=(0,10), min_length=2)
 
 # user
-db.define_table('profile',
-                 Field ('name', 'string', default=get_user_name()),
+db.define_table ('profile',
+                 Field ('name', 'string'),
                  Field ('owner_id',default=get_user_id()),
                  Field ('tags','list:string')
                  )

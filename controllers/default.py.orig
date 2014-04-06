@@ -10,63 +10,16 @@
 #########################################################################
 
 def index():
-    message = None
-    welcome = "Welcome to CruzCal "
-    
-    # Is the user logged in?
-    # else goto wall
-    name_or_blank = get_user_name() or ""
-    if (auth.user == None):
-        message = T(welcome + name_or_blank)
-    else:
-        redirect(URL('default','wall'))
-        
-    return dict(m = message)   
-
 <<<<<<< HEAD
-@auth.requires_login()
-def edit_profile():
-    # URL validation
-    u = request.args(0) or None
-    if (u == None):
-        session.flash = T('Invalid URL')
-        redirect(URL('default','index'))
-        # User validation
-        if (u != get_user_id()):
-            session.flash = T('Invalid URL')
-            redirect(URL('default','index'))
-    
-    g = None
-    if (not (auth.has_membership('poster') and auth.has_membership('viewer'))):
-        g = request.args(1) or None
-        
-    if (g == 0):
-        auth.add_membership('poster')
-    elif (g == 1):
-        auth.add_membership('viewer')
-        
-    form = SQLFORM(db.profile,
-                   record=r,
-                   fields =['name'],
-                   submit_button = 'Submit',
-                   deletable= False,
-                   showid=False)
-    
-    if (form.process().accepted):
-        session.flash = T('Success!')
-        redirect(URL('default','wall',args=[get_user_id()]))
-    else:
-        session.flash = T('Check for errors in form.')
-    return dict(form=form)
-    
-@auth.requires_login()
-def wall():       
-    return dict()
-
-@auth.requires_membership('poster')
-def edit_event():
-    return dict()
+    if (auth.user == None):
+        response.flash = T("Welcome to CruzCal!")
+    elif (db(db.profile.owner_id == get_user_id()).count > 0):
+        redirect(URL('default','start',args=[get_user_id()]))
 =======
+    """
+    example action using the internationalization operator T and flash
+    rendered by views/default/index.html or views/generic.html
+
     if you need a simple wiki simply replace the two lines below with:
     return auth.wiki()
     """
@@ -75,22 +28,25 @@ def edit_event():
     user_found = True
     events = """
 	$(document).ready(function() {
-
+	
 		var date = new Date();
 		var d = date.getDate();
 		var m = date.getMonth();
 		var y = date.getFullYear();
-
+		
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: true,
 			events: 'http://www.google.com/calendar/feeds/nihasmit%40ucsc.edu/public/basic'		});
-
+		
 	});
     """
     if user_found:
         return dict(events=SCRIPT(events, _type='text/javascript'))
->>>>>>> 7190cb7410d4be01bf1ba59d2641011133e93e66
+>>>>>>> d9ba38f813c440d710157a6010492486a62ba755
+    else:
+        redirect(URL('default','setup_profile',args=[get_user_id()]))
+    return dict()
 
 def user():
     """

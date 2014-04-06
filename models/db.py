@@ -68,7 +68,7 @@ auth.settings.reset_password_requires_verification = True
 #########################################################################
 ## Define your tables below (or better in another model file) for example
 ##
-## >>> db.define_table('mytable',Field('myfield','string'))
+## db.define_table('mytable',Field('myfield','string'))
 ##
 ## Fields can be 'string','text','password','integer','double','boolean'
 ##       'date','time','datetime','blob','upload', 'reference TABLENAME'
@@ -77,9 +77,9 @@ auth.settings.reset_password_requires_verification = True
 ##
 ## More API examples for controllers:
 ##
-## >>> db.mytable.insert(myfield='value')
-## >>> rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
-## >>> for row in rows: print row.id, row.myfield
+## db.mytable.insert(myfield='value')
+## rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
+## for row in rows: print row.id, row.myfield
 #########################################################################
 
 ## after defining tables, uncomment below to enable auditing
@@ -120,9 +120,9 @@ def get_user_email():
             return None
         else:
             return auth.user.email.lower()
-        
+
 #### How to get a user ID.
-def get_user_id():  
+def get_user_id():
     if request.env.web2py_runtime_gae:
         from google.appengine.api import users as googleusers
         u = googleusers.get_current_user()
@@ -135,7 +135,7 @@ def get_user_id():
             return None
         else:
             return auth.user.id
-        
+
 #### How to get a user name.
 def get_user_name():
     if request.env.web2py_runtime_gae:
@@ -221,7 +221,7 @@ def get_configured_logger(name):
 
     return logger
 
-# Assign application logger to a global var  
+# Assign application logger to a global var
 logger = get_configured_logger(request.application)
 
 # Assign application logger to a global var
@@ -235,6 +235,81 @@ from gluon import current
 current.db = db
 current.logger = logger
 
-# Let's log the user. 
+# Let's log the user.
 logger.info("User: %r" % get_user_email())
 logger.info("ID: %r" % get_user_id())
+
+
+##################################
+### Tag Functions
+##################################
+
+def get_relation_strength(name, tag_assoc):
+    if (name == tag_assoc.to_):
+        other = db(db.tags.name == tag_assoc.from_).select().first()
+    elif (name == tag_assoc.from_):
+        other = db(db.tags.name == tag_assoc.to_).select().first()
+    else: return 0
+    return tag_assoc.num / other.num
+
+class TagData:
+    def __init__(self, name, rel_str):
+        self.name = name
+        self.rel_str = rel_str
+
+def get_related_tags(name):
+    entries = db((db.tag_assoc.to_ == name) | (db.tag_assoc.from_ == name)).select()
+    result = []
+    for e in entries:
+        if (name == tag_assoc.to_):
+            other = tag_assoc.from_
+        elif (name == tag_assoc.from_):
+            other = tag_assoc.to_
+        imin = 0
+        imax = len(result)
+        while imin < imax:
+            imid = round((imin + imax) / 2)
+            if (strength < result[imid].rel_str):
+                imin = imid + 1
+            else:
+                imax = imid
+        result.insert(imin, TagData(name, strength))
+    return result
+
+class ConflictData:
+    def __init__(self, event, rel_str):
+        self.event = event
+        self.rel_str = rel_str
+
+# 'start' and 'end' are UNIX timestamps
+def get_tag_conflicts(tag, rel_str, start, end):
+    search1 = ((db.events.start > start) & (db.events.start < end))
+    search2 = ((start > db.events.start) & (start < db.events.end))
+    entries = db(search1 | search2).select()
+    result = []
+    for e in entries:
+        result.append(ConflictData(e, rel_str))
+    return result
+
+# 'start' and 'end' are UNIX timestamps
+def get_timing_conflicts(tags, start, end):
+    rel_tag_data = []
+    for tag in tags:
+        rel_tag_data = rel_tag_data + get_related_tags(tag)
+
+    i = 0
+    for tag_data in rel_tag_data:
+        delete = False
+        for tag in tags:
+            if (tag_data.name == tag): delete = True, break
+        if (delete or tag_data.rel_str < 40): rel_tag_data.pop(i)
+        i = i + 1
+
+    conflicts = []
+    for tag in tags:
+        conflicts = conflicts + get_tag_conflicts(tag, 100, start, end)
+
+    for tag_data in rel_tag_data:
+        conflicts = conflicts + get_tag_conflicts(tag_data.name, tag_data.rel_str, start, end)
+
+    return conflicts
