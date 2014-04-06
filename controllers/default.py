@@ -105,8 +105,9 @@ def new_event():
         session.flash = T('Check for errors in form.')
     return dict(form=form)
 
-def search():
-    return dict()
+def search(tag):
+    results = db(db.events.tags==tag)
+    return dict(results=results)
 
 @auth.requires_login
 def setup_profile():
