@@ -192,8 +192,10 @@ def list_format(results):
             tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
             if (tag != result.tags[len(result.tags) - 1]):
                 tag_str = CAT(tag_str, ', ')
-
-        inner_html = CAT(H2(title), H4('From: ', result.start_time.strftime("%b %d, %Y %I:%M%p")), H4('To: ', result.end_time.strftime("%b %d, %Y %I:%M%p")), CAT(H4('Tags: ', tag_str)))
+        if (result.start_time.strftime("%b%d%Y") == result.end_time.strftime("%b%d%Y")):
+            inner_html = CAT(H2(title), H4(result.start_time.strftime("%b %d, %Y %I:%M%p") + " - " + result.end_time.strftime("%I:%M%p")), CAT(H4('Tags: ', tag_str)))
+        else:
+            inner_html = CAT(H2(title), H4('From: ', result.start_time.strftime("%b %d, %Y %I:%M%p")), H4('To: ', result.end_time.strftime("%b %d, %Y %I:%M%p")), CAT(H4('Tags: ', tag_str)))
 
         div = DIV(inner_html, _id="event-listing")
         results_html.append(div)
