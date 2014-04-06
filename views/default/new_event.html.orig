@@ -9,12 +9,21 @@ $(document).ready(function() {
         var end_time = form[2].value;
         var tags = form[3].value;
         $("#conflict_container").show();
+<<<<<<< HEAD
+		var date = new Date();
+		var d = date.getDate();
+		var m = date.getMonth();
+		var y = date.getFullYear();
+        ajax('search_date', ['start_time', 'end_time', 'tags'], 'conflict_container');
+=======
         ajax('search_date', ['start_time', 'end_time', 'tags'], 'js');
 
 		$('#calendar').fullCalendar({
             height: 500,
 			editable: false,
 			events: ''});
+
+>>>>>>> 544fd83f1419baef4c32b6777bf49a9bda3a9b30
     });
 
     $("#gcal_feed").hide();
@@ -36,7 +45,7 @@ $(document).ready(function() {
 <a id="new_event_button" href="#" >New Event</a>&nbsp|&nbsp<a id="gcal_feed_button" href="#">Google Calendar Feed</a>
 <div id="new_event">{{=form}}</div>
 <div id="gcal_feed">{{=gcal}}</div>
-<form>
+<form id="myform">
 <input id="conflict_button" type="button" value="Check this event for time conflicts" >
 </form>
 <div id="conflict_container"><h3 align="center">Other events at this time.</h3><div id="js"></div><div id="calendar"></div></div>

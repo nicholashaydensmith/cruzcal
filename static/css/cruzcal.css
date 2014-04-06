@@ -79,3 +79,7 @@ margin: 12px;
 #event-listing:hover{
 border-color: #4872ED;
 }
+
+#event-view{
+text-align:left;
+}
