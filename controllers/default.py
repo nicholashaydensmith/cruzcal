@@ -261,10 +261,25 @@ def view_event():
     for result in results:
         results_html += (IMG(_src=URL('default', 'download', args=result.image), _alt="poster"))
         results_html += (H1(result.title))
-        results_html += (H3(result.start_time))
-        results_html += (H3(result.end_time))
-        results_html += (P(result.details))
-        results_html += (P(result.tags))
+        
+        #start_date = datetime.strptime(result.start_time, "%Y-%m-%d")
+        #end_date = datetime.strptime(result.end_time)
+        
+        #time_str = CAT(H3(str(start_date)), H3('-'), H3(str(end_date)))
+        #div_center = DIV(time_str, _id="event-list")
+        #results_html.append(div_center)
+        #results_html += (H3(result.start_time))
+        #results_html += (H3(result.end_time))
+        
+        tag_str = CAT('', '')
+        for tag in result.tags:
+            tag_str = CAT(tag_str, A(tag, _href=URL('default', 'search', args=[str(tag)])))
+            if (tag != result.tags[len(result.tags) - 1]):
+                tag_str = CAT(tag_str, ', ')
+
+    inner_html = CAT(H4('Description'), P(result.details), CAT(P('Tags: ', tag_str)))
+    div = DIV(inner_html, _id="event-view")
+    results_html.append(div)
 
     return dict(view_event=results_html)
 
